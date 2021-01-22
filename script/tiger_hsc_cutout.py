@@ -56,7 +56,7 @@ def sky_cone(ra_c, dec_c, theta, steps=50, include_center=True):
         Coordinates of cone.
     """
     if isinstance(theta, float) or isinstance(theta, int):
-        theta = theta * u.Unit("arcsec")
+        theta = theta * u.Unit('arcsec')
 
     cone = SphericalPolygon.from_cone(
         ra_c, dec_c, theta.to('deg').value, steps=steps)
@@ -188,13 +188,13 @@ def make_single_cutout(img, coord, radius):
 
     # Original pixel coordinate of the bounding box
     x0, y0 = bbox.getBegin()
-
+    
     # Clip the cutout region from the original image
     bbox.clip(img.getBBox(afwImage.PARENT))
 
     # Make an afwImage object
     cut = img.Factory(img, bbox, afwImage.PARENT)
-
+    
     return cut, x0, y0
 
 def build_cutout_wcs(coord, cutouts, index, origins):
@@ -228,11 +228,12 @@ def generate_cutout(butler, skymap, ra, dec, band='i', label='deepCoadd_skyMap',
                     radius=10.0 * u.arcsec, psf=True, verbose=False):
     """Generate a single cutout image.
     """
-    if type(radius != u.Quantity):
+    if not isinstance(radius, u.Quantity):
         # Assume that this is in pixel
         radius = int(radius)
-    radius = int(radius.to('arcsec').value / PIXEL_SCALE)
-
+    else:
+        radius = int(radius.to('arcsec').value / PIXEL_SCALE)
+    
     # Width and height of the post-stamps
     stamp_shape = (radius * 2 + 1, radius * 2 + 1)
 
@@ -241,7 +242,7 @@ def generate_cutout(butler, skymap, ra, dec, band='i', label='deepCoadd_skyMap',
         ra * geom.degrees, dec * geom.degrees)
 
     # Make a list of (RA, Dec) that covers the cutout region
-    radec_list = np.array(sky_cone(ra, dec, radius)).T
+    radec_list = np.array(sky_cone(ra, dec, radius * PIXEL_SCALE, steps=50)).T
 
     # Retrieve the Tracts and Patches that cover the cutout region
     patches, _ = tracts_n_patches(radec_list, skymap)
@@ -264,9 +265,9 @@ def generate_cutout(butler, skymap, ra, dec, band='i', label='deepCoadd_skyMap',
     cutouts = []
     idx, bbox_sizes, bbox_origins = [], [], []
 
-    for img in images:
+    for img_patch in images:
         # Generate cutout
-        cut, x0, y0 = make_single_cutout(img, coord, radius)
+        cut, x0, y0 = make_single_cutout(img_patch, coord, radius)
         cutouts.append(cut)
 
         # Original lower corner pixel coordinate
@@ -393,7 +394,7 @@ def batch_cutout(incat, size=10, band='i', ra='ra', dec='dec', name=None, prefix
         _ = [cutout_one(
             butler, skymap, obj, band, label, psf) for obj in input_cat]
     else:
-        Parallel(n_jobs=args.njobs)(
+        Parallel(n_jobs=njobs)(
             delayed(cutout_one)(butler, skymap, obj, band, label, psf) for obj in input_cat)
 
 
@@ -438,6 +439,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     batch_cutout(
-        args.input, size=args.size, band=args.band, ra=args.ra, dec=args.dec, 
-        name=args.name, prefix=args.prefix, output=args.output, unit=args.unit, 
+        args.input, size=args.size, band=args.band, ra=args.ra, dec=args.dec,
+        name=args.name, prefix=args.prefix, output=args.output, unit=args.size_unit,
         label=args.label, root=args.root, njobs=args.njobs, psf=args.psf)
