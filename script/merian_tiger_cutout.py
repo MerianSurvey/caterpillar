@@ -383,7 +383,7 @@ def prepare_catalog_merian(cat, size, band, ra='ra', dec='dec', name=None, unit=
     # Radius of the cutout
     if is_number(size):
         # Using the same size for all objects
-        size_arr = np.full(len(cat), size)
+        size_arr = np.full(len(cat), float(size))
     else:
         size_arr = cat[size]
 
@@ -392,7 +392,7 @@ def prepare_catalog_merian(cat, size, band, ra='ra', dec='dec', name=None, unit=
         size_arr = [s * u.Unit(unit) for s in size_arr]
 
     sample = QTable(
-        [name_arr, output_arr, ra_arr, dec_arr, size_arr],
+        [name_arr, output_arr, list(ra_arr), list(dec_arr), size_arr],
         names=('name', 'prefix', 'ra', 'dec', 'radius')
     )
 
