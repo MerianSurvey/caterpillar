@@ -4,6 +4,7 @@ Based on Johnny Greco's lsstutils package: https://github.com/johnnygreco/lsstut
 """
 
 import os
+import shutil
 import argparse
 
 from datetime import date
@@ -310,7 +311,7 @@ def cutout_one(butler, skymap, obj, band, label, psf):
 
     # Make a new folder is necessary
     if not os.path.isdir(os.path.split(prefix)[0]):
-        os.mkdir(os.path.split(prefix)[0])
+        os.mkdir(os.path.split(prefix)[0], exist_ok=True)
 
     if psf:
         img, psf = cutout
@@ -354,7 +355,7 @@ def prepare_catalog_merian(cat, size, band, ra='ra', dec='dec', name=None, unit=
     merian_output = os.path.join(merian_root, rerun)
 
     if not os.path.isdir(merian_output):
-        os.mkdir(merian_output)
+        os.mkdir(merian_output, exist_ok=True)
 
     if chunk is None:
         chunk_arr = np.full(len(ra_arr), 1)
@@ -426,6 +427,13 @@ def batch_cutout_merian(incat, size=10, band='i', ra='ra', dec='dec', name=None,
     # Read the input catalog
     cat = Table.read(incat)
     print("# Will generate {:d} cutouts in {:s} band".format(len(cat), band))
+
+    # Folder for the dataset
+    if rerun is None:
+        rerun = 'test'
+    merian_output = os.path.join(merian_root, rerun)
+    if not os.path.isdir(merian_output):
+        os.mkdir(merian_output, exist_ok=True)
 
     # Get the (RA, Dec)
     input_cat = prepare_catalog_merian(
