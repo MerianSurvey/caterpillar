@@ -377,7 +377,8 @@ def prepare_catalog_merian(cat, size, band, ra='ra', dec='dec', name=None, unit=
 
     output_arr = [
         os.path.join(merian_output, chunk, ids, name)
-        for (chunk, ids, name) in zip(chunk_arr, id_arr, name_arr)
+        for (str(chunk).strip(), str(ids).strip(), name.strip()) in zip(
+            chunk_arr, id_arr, name_arr)
     ]
 
     # Radius of the cutout
