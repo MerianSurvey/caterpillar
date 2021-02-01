@@ -404,7 +404,7 @@ def prepare_catalog_merian(cat, size, band, ra='ra', dec='dec', name=None, unit=
     return sample
 
 
-def batch_cutout_merian(incat, size=10, band='i', ra='ra', dec='dec', name=None, prefix=None,
+def batch_cutout_merian(incat, size=10, ra='ra', dec='dec', name=None, prefix=None,
                         unit='arcsec', label='deepCoadd_calexp', root=DATA_ROOT,
                         merian_root=MERIAN_ROOT, rerun=None, chunk=None,
                         njobs=1, psf=True):
@@ -414,10 +414,6 @@ def batch_cutout_merian(incat, size=10, band='i', ra='ra', dec='dec', name=None,
     butler = dafPersist.Butler(root)
     skymap = butler.get('deepCoadd_skyMap', immediate=True)
 
-    # Dealing with the input catalog
-    if band.lower() not in ['g', 'r', 'i', 'z', 'y']:
-        raise ValueError("Wrong filter name. [g, r, i, z, y]")
-
     if label.strip() not in ['deepCoadd', 'deepCoadd_calexp']:
         raise ValueError("Wrong coadd type. [deepCoadd, deepCoadd_calexp]")
 
@@ -426,7 +422,6 @@ def batch_cutout_merian(incat, size=10, band='i', ra='ra', dec='dec', name=None,
 
     # Read the input catalog
     cat = Table.read(incat)
-    print("# Will generate {:d} cutouts in {:s} band".format(len(cat), band))
 
     # Folder for the dataset
     if rerun is None:
@@ -435,17 +430,20 @@ def batch_cutout_merian(incat, size=10, band='i', ra='ra', dec='dec', name=None,
     if not os.path.isdir(merian_output):
         os.makedirs(merian_output, exist_ok=True)
 
-    # Get the (RA, Dec)
-    input_cat = prepare_catalog_merian(
-        cat, size, band, ra=ra, dec=dec, name=name, unit=unit, prefix=prefix,
-        merian_root=merian_root, rerun=rerun, chunk=chunk)
+    for band in ['g', 'r', 'i', 'z', 'y']:
+        print("# Will generate {:d} cutouts in {:s} band".format(len(cat), band))
+        # Get the (RA, Dec)
+        input_cat = prepare_catalog_merian(
+            cat, size, band, ra=ra, dec=dec, name=name, unit=unit, prefix=prefix,
+            merian_root=merian_root, rerun=rerun, chunk=chunk)
 
-    if njobs <= 1:
-        _ = [cutout_one(
-            butler, skymap, obj, band, label, psf) for obj in input_cat]
-    else:
-        Parallel(n_jobs=njobs)(
-            delayed(cutout_one)(butler, skymap, obj, band, label, psf) for obj in input_cat)
+        if njobs <= 1:
+            _ = [cutout_one(
+                butler, skymap, obj, band, label, psf) for obj in input_cat]
+        else:
+            Parallel(n_jobs=njobs)(
+                delayed(cutout_one)(
+                    butler, skymap, obj, band, label, psf) for obj in input_cat)
 
 
 if __name__ == '__main__':
@@ -455,9 +453,6 @@ if __name__ == '__main__':
     parser.add_argument(
         '-r', '--root', dest='root', help="Root directory of data repository",
         default=DATA_ROOT)
-    parser.add_argument(
-        '-f', '--filter', dest='band', help="HSC filter name",
-        default="i")
     parser.add_argument(
         '-l', '--label', dest='label', help="Label of the Coadd data product",
         default='deepCoadd_calexp')
