@@ -311,7 +311,7 @@ def cutout_one(butler, skymap, obj, band, label, psf):
 
     # Make a new folder is necessary
     if not os.path.isdir(os.path.split(prefix)[0]):
-        os.mkdir(os.path.split(prefix)[0], exist_ok=True)
+        os.makedirs(os.path.split(prefix)[0], exist_ok=True)
 
     if psf:
         img, psf = cutout
@@ -355,7 +355,7 @@ def prepare_catalog_merian(cat, size, band, ra='ra', dec='dec', name=None, unit=
     merian_output = os.path.join(merian_root, rerun)
 
     if not os.path.isdir(merian_output):
-        os.mkdir(merian_output, exist_ok=True)
+        os.makedirs(merian_output, exist_ok=True)
 
     if chunk is None:
         chunk_arr = np.full(len(ra_arr), 1)
@@ -433,7 +433,7 @@ def batch_cutout_merian(incat, size=10, band='i', ra='ra', dec='dec', name=None,
         rerun = 'test'
     merian_output = os.path.join(merian_root, rerun)
     if not os.path.isdir(merian_output):
-        os.mkdir(merian_output, exist_ok=True)
+        os.makedirs(merian_output, exist_ok=True)
 
     # Get the (RA, Dec)
     input_cat = prepare_catalog_merian(
