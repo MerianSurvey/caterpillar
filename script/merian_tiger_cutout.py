@@ -454,7 +454,7 @@ if __name__ == '__main__':
         '-l', '--label', dest='label', help="Label of the Coadd data product",
         default='deepCoadd_calexp')
     parser.add_argument(
-        '-m', '--merian', dest='merian_output', help="Output directory",
+        '-m', '--merian', dest='merian_root', help="Output directory",
         default=MERIAN_ROOT)
     parser.add_argument(
         '-t', '--test', dest='rerun', help="Name of the test or rerun",
@@ -488,6 +488,6 @@ if __name__ == '__main__':
 
     batch_cutout_merian(
         args.input, size=args.size, band=args.band, ra=args.ra, dec=args.dec,
-        name=args.name, prefix=args.prefix, unit=args.size_unit, merian_output=args.merian_output,
+        name=args.name, prefix=args.prefix, unit=args.size_unit, merian_root=args.merian_root,
         chunk=args.chunk, rerun=args.test, label=args.label, root=args.root,
         njobs=args.njobs, psf=args.psf)
