@@ -4,6 +4,7 @@ Based on Johnny Greco's lsstutils package: https://github.com/johnnygreco/lsstut
 """
 
 import os
+import shutil
 import argparse
 
 from datetime import date
@@ -310,7 +311,7 @@ def cutout_one(butler, skymap, obj, band, label, psf):
 
     # Make a new folder is necessary
     if not os.path.isdir(os.path.split(prefix)[0]):
-        os.mkdir(os.path.split(prefix)[0])
+        os.makedirs(os.path.split(prefix)[0], exist_ok=True)
 
     if psf:
         img, psf = cutout
@@ -354,7 +355,7 @@ def prepare_catalog_merian(cat, size, band, ra='ra', dec='dec', name=None, unit=
     merian_output = os.path.join(merian_root, rerun)
 
     if not os.path.isdir(merian_output):
-        os.mkdir(merian_output)
+        os.mkdir(merian_output, exist_ok=True)
 
     if chunk is None:
         chunk_arr = np.full(len(ra_arr), 1)
@@ -375,14 +376,14 @@ def prepare_catalog_merian(cat, size, band, ra='ra', dec='dec', name=None, unit=
             "{:s}_{:s}_{:s}".format(prefix, str(name).strip(), band.lower()) for name in cat[name]]
 
     output_arr = [
-        os.path.join(merian_output, chunk, ids, name)
+        os.path.join(merian_output, str(chunk).strip(), str(ids).strip(), "hsc", name.strip())
         for (chunk, ids, name) in zip(chunk_arr, id_arr, name_arr)
     ]
 
     # Radius of the cutout
     if is_number(size):
         # Using the same size for all objects
-        size_arr = np.full(len(cat), size)
+        size_arr = np.full(len(cat), float(size))
     else:
         size_arr = cat[size]
 
@@ -391,7 +392,7 @@ def prepare_catalog_merian(cat, size, band, ra='ra', dec='dec', name=None, unit=
         size_arr = [s * u.Unit(unit) for s in size_arr]
 
     sample = QTable(
-        [name_arr, output_arr, ra_arr, dec_arr, size_arr],
+        [name_arr, output_arr, list(ra_arr), list(dec_arr), size_arr],
         names=('name', 'prefix', 'ra', 'dec', 'radius')
     )
 
@@ -403,7 +404,7 @@ def prepare_catalog_merian(cat, size, band, ra='ra', dec='dec', name=None, unit=
     return sample
 
 
-def batch_cutout_merian(incat, size=10, band='i', ra='ra', dec='dec', name=None, prefix=None,
+def batch_cutout_merian(incat, size=10, ra='ra', dec='dec', name=None, prefix=None,
                         unit='arcsec', label='deepCoadd_calexp', root=DATA_ROOT,
                         merian_root=MERIAN_ROOT, rerun=None, chunk=None,
                         njobs=1, psf=True):
@@ -413,10 +414,6 @@ def batch_cutout_merian(incat, size=10, band='i', ra='ra', dec='dec', name=None,
     butler = dafPersist.Butler(root)
     skymap = butler.get('deepCoadd_skyMap', immediate=True)
 
-    # Dealing with the input catalog
-    if band.lower() not in ['g', 'r', 'i', 'z', 'y']:
-        raise ValueError("Wrong filter name. [g, r, i, z, y]")
-
     if label.strip() not in ['deepCoadd', 'deepCoadd_calexp']:
         raise ValueError("Wrong coadd type. [deepCoadd, deepCoadd_calexp]")
 
@@ -425,19 +422,28 @@ def batch_cutout_merian(incat, size=10, band='i', ra='ra', dec='dec', name=None,
 
     # Read the input catalog
     cat = Table.read(incat)
-    print("# Will generate {:d} cutouts in {:s} band".format(len(cat), band))
 
-    # Get the (RA, Dec)
-    input_cat = prepare_catalog_merian(
-        cat, size, band, ra=ra, dec=dec, name=name, unit=unit, prefix=prefix,
-        merian_root=merian_root, rerun=rerun, chunk=chunk)
+    # Folder for the dataset
+    if rerun is None:
+        rerun = 'test'
+    merian_output = os.path.join(merian_root, rerun)
+    if not os.path.isdir(merian_output):
+        os.makedirs(merian_output, exist_ok=True)
 
-    if njobs <= 1:
-        _ = [cutout_one(
-            butler, skymap, obj, band, label, psf) for obj in input_cat]
-    else:
-        Parallel(n_jobs=njobs)(
-            delayed(cutout_one)(butler, skymap, obj, band, label, psf) for obj in input_cat)
+    for band in ['g', 'r', 'i', 'z', 'y']:
+        print("# Will generate {:d} cutouts in {:s} band".format(len(cat), band))
+        # Get the (RA, Dec)
+        input_cat = prepare_catalog_merian(
+            cat, size, band, ra=ra, dec=dec, name=name, unit=unit, prefix=prefix,
+            merian_root=merian_root, rerun=rerun, chunk=chunk)
+
+        if njobs <= 1:
+            _ = [cutout_one(
+                butler, skymap, obj, band, label, psf) for obj in input_cat]
+        else:
+            Parallel(n_jobs=njobs)(
+                delayed(cutout_one)(
+                    butler, skymap, obj, band, label, psf) for obj in input_cat)
 
 
 if __name__ == '__main__':
@@ -448,13 +454,10 @@ if __name__ == '__main__':
         '-r', '--root', dest='root', help="Root directory of data repository",
         default=DATA_ROOT)
     parser.add_argument(
-        '-f', '--filter', dest='band', help="HSC filter name",
-        default="i")
-    parser.add_argument(
         '-l', '--label', dest='label', help="Label of the Coadd data product",
         default='deepCoadd_calexp')
     parser.add_argument(
-        '-m', '--merian', dest='merian_output', help="Output directory",
+        '-m', '--merian', dest='merian_root', help="Output directory",
         default=MERIAN_ROOT)
     parser.add_argument(
         '-t', '--test', dest='rerun', help="Name of the test or rerun",
@@ -488,6 +491,6 @@ if __name__ == '__main__':
 
     batch_cutout_merian(
         args.input, size=args.size, band=args.band, ra=args.ra, dec=args.dec,
-        name=args.name, prefix=args.prefix, unit=args.size_unit, merian_output=args.merian_output,
-        chunk=args.chunk, rerun=args.test, label=args.label, root=args.root,
+        name=args.name, prefix=args.prefix, unit=args.size_unit, merian_root=args.merian_root,
+        chunk=args.chunk, rerun=args.rerun, label=args.label, root=args.root,
         njobs=args.njobs, psf=args.psf)

@@ -350,7 +350,7 @@ def prepare_catalog(cat, size, band, ra='ra', dec='dec', name=None, unit='arcsec
     # Radius of the cutout
     if is_number(size):
         # Using the same size for all objects
-        size_arr = np.full(len(cat), size)
+        size_arr = np.full(len(cat), float(size))
     else:
         size_arr = cat[size]
 
