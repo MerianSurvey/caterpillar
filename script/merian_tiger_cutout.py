@@ -376,7 +376,7 @@ def prepare_catalog_merian(cat, size, band, ra='ra', dec='dec', name=None, unit=
             "{:s}_{:s}_{:s}".format(prefix, str(name).strip(), band.lower()) for name in cat[name]]
 
     output_arr = [
-        os.path.join(merian_output, str(chunk).strip(), str(ids).strip(), name.strip())
+        os.path.join(merian_output, str(chunk).strip(), str(ids).strip(), "hsc", name.strip())
         for (chunk, ids, name) in zip(chunk_arr, id_arr, name_arr)
     ]
 
