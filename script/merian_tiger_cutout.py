@@ -490,7 +490,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     batch_cutout_merian(
-        args.input, size=args.size, band=args.band, ra=args.ra, dec=args.dec,
+        args.input, size=args.size, ra=args.ra, dec=args.dec,
         name=args.name, prefix=args.prefix, unit=args.size_unit, merian_root=args.merian_root,
         chunk=args.chunk, rerun=args.rerun, label=args.label, root=args.root,
         njobs=args.njobs, psf=args.psf)
