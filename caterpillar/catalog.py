@@ -11,16 +11,15 @@ from astropy.table import Table, Column, vstack
 __all__ = ["remove_is_null", "moments_to_shape"]
 
 
-def remove_is_null(table, output=None, cat_hdu=1, verbose=True,
-                   string='isnull', return_data=True):
+def remove_is_null(table, output=None, verbose=True, string='isnull', return_data=True):
     """
     Remove the xxx_isnull columns from the catalog.
     This is an annoying issue with FITS table from HSC database.
 
     Parameters
     ----------
-    table : str
-        Name of the FITS catalog.
+    table : str or astropy.table object
+        Name of the FITS catalog or the data itself
     cat_hdu : int, optional
         The HDU of the catalog data.
         Default: 1
@@ -37,15 +36,17 @@ def remove_is_null(table, output=None, cat_hdu=1, verbose=True,
     verbose : bool, optional
         Default : True
     """
-    if not os.path.isfile(table):
-        raise Exception("# Can not find catalog: %s" % table)
+    if isinstance(table, Table):
+        data = table
+    else:
+        if not os.path.isfile(table):
+            raise Exception("# Can not find catalog: %s" % table)
+        data = Table.read(table, format='fits')
 
-    data = Table.read(table, format='fits')
     if verbose:
         print("Reading the data....")
     col_names = data.colnames
     col_remove = [col for col in col_names if string in col]
-
     data.remove_columns(col_remove)
 
     if output is None:
@@ -61,7 +62,7 @@ def remove_is_null(table, output=None, cat_hdu=1, verbose=True,
         return None
 
 
-def moments_to_shape(catalog, shape_type='i_sdssshape', axis_ratio=False,
+def moments_to_shape(catalog, shape_type='i_sdss_shape', axis_ratio=False,
                      radian=False, update=True, to_pixel=False):
     """
     Convert the 2nd moments into elliptical shape: radius, ellipticity, position angle.
