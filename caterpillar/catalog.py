@@ -127,7 +127,8 @@ def filter_through_bright_star_mask(catalog, mask_dir, reg_prefix='new_S18Amask'
         os.path.join(mask_dir, reg_prefix + '_' + band + '.reg') for band in filters]
 
     # Output catalog
-    output_catalogs = [catalog.replace('.fits', '_bsm_' + band + '.fits') for band in filters]
+    output_catalogs = [
+        catalog.replace('.fits', '_bsm_' + band + '.fits') for band in filters]
 
     output_final = catalog.replace('.fits', '_%s.fits' % output_suffix)
 
@@ -160,4 +161,4 @@ def filter_through_bright_star_mask(catalog, mask_dir, reg_prefix='new_S18Amask'
         except OSError:
             pass
 
-    return output_final
+    return Table.read(output_final)
