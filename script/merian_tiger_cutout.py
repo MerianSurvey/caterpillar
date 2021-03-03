@@ -32,7 +32,7 @@ import lsst.afw.display
 import lsst.afw.display.rgb as afwRgb
 
 
-MERIAN_ROOT = '/tigress/MERIAN/cutout'
+MERIAN_ROOT = '/tigress/MERIAN/poststamps'
 DATA_ROOT = '/tigress/HSC/DR/s18a_wide'
 PIXEL_SCALE = 0.168 # arcsec / pixel
 
