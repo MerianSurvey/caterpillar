@@ -162,3 +162,15 @@ def filter_through_bright_star_mask(catalog, mask_dir, reg_prefix='new_S18Amask'
             pass
 
     return Table.read(output_final)
+
+def add_chunk_id(catalog):
+    """Assign chunk ID based on HSC Tract/Patch."""
+    chunks = []
+    for obj in catalog:
+        tract = '{:5d}'.format(obj['tract'])
+        patch = '{0:03d}'.format(obj['patch'])
+        chunks.append('_'.join([tract, patch[0], patch[2]]))
+
+    catalog.add_column(Column(data=chunks, name='chunk_id'))
+
+    return catalog
