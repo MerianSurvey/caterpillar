@@ -1,0 +1,186 @@
+SIMPLE  =                    T / Standard FITS format                           BITPIX  =                    8 / Character data                                 NAXIS   =                    1 / Text string                                    NAXIS1  =                 9669 / Number of characters                           VOTMETA =                    T / Table metadata in VOTable format               EXTEND  =                    T / There are standard extensions                  COMMENT                                                                         COMMENT The data in this primary HDU consists of bytes which                    COMMENT comprise a VOTABLE document.                                            COMMENT The VOTable describes the metadata of the table contained               COMMENT in the following BINTABLE extension.                                    COMMENT Such a BINTABLE extension can be used on its own as a perfectly         COMMENT good table, but the information from this HDU may provide some          COMMENT useful additional metadata.                                             COMMENT There is one following BINTABLE.                                        NTABLE  =                    1 / Number of following BINTABLE HDUs              END                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             <?xml version='1.0'?>
+<VOTABLE version="1.4"
+ xmlns="http://www.ivoa.net/xml/VOTable/v1.3">
+<!--
+ !  VOTable written by STIL version 3.4-2 (uk.ac.starlink.votable.VOTableWriter)
+ !  at 2021-02-24T10:02:30
+ !-->
+<RESOURCE>
+<!-- Describes BINTABLE extensions in the following HDU.-->
+<TABLE name="Joined" nrows="148">
+<DESCRIPTION>
+\Release of the spectroscopic catalog to the TEAM ONLY
+\
+\ March 19 2015
+\ Contact &amp; Feedback to : Mara Salvato mara@mpe.mpg.de
+\
+\
+\ DIFFERENCES FROM PREVIOUS VERSIONS (OCTOBER 2012):
+\
+\ -- Addition of DEIMOS 2014 (Guenther Hasinger)
+\ -- Addition of MOSFIRE 2014 (Nick Scoville)
+\ -- Addition of DEIMOS  (Caitlin Casey)
+\ -- Addition of LRIS (Caitlin Casey)
+\ -- Re-analisys of old DEIMOS runs
+\ -- Addition of Subaru/FOCAS
+\ -- Updated  to DR12 (SDSS)
+\ -- Addition of some HST-GRISM redshifts (Jeyhan Kartaltepe)
+\ -- Addition of reduced VUDS sources (coordinates and quality of redshifts)
+\ -- Addition of FMOS  (John Silverman, Jeyhan Kartaltepe)
+\ -- Addition of Gemini-S (Balogh)
+\ -- Addition of FORS2 (Johan Coparat)
+\ -- Addition of Vimos (Angela Iovino)
+\ -- Addition of MOIRCS (Masato Onodera)
+\ -- Addition of XSHOOTER (Marcella Brusa)
+\ -- Addition of AzTEC (Min, Vernesa)
+\ -- Addition of PRIMUS (pubblic)
+\ -- Offset correction for 2dF +0.991/3600 in RA and +0.334/3600 in Dec
+\ -- Addition of MOSDEF 2012-2013 (Alice Shapley)
+\ -- Addition of MOSFIRE (Francesca Civano)
+\ -- Addition of SINFONI (Mara Salvato)
+\ -- Addition of GMOS target positions (Casey Papovich)
+\ -- When possible, the original ID is provided for a easier search of the spectra
+\
+\
+\ ACKNOWLEDGEMENTS: The entire zCOSMOS, DEIMOS, VUDS, MOSFIRE, FORS2, FMOS, MOIRCS ETC. TEAMS.
+\ Without the hard work of everybody and their willingness to share  we could not provide this list of sources.
+\  Remember this and  do the same, when possible.
+\
+\
+\ CONTRIBUTIONS &amp; CONTACTS
+\
+\ 2dF   2dF             Public
+\ 2MASS 2MASS           Public
+\ DR12   SDSS            Public
+\ VIMOS zCOSMOS_BRIGHT  Public
+\ VIMOS zCOSMOS_DEEP    TEAM ONLY             Simon Lilly          simon.lilly@phys.ethz.ch
+\ VIMOS groups          TEAM ONLY             Angela Iovino        angela.iovino@brera.inaf.it 
+\ IRS   H.Fu            public                Hai Fu               fu.hai.astro@gmail.com
+\ FOCAS T. Nagao        TEAM ONLY             Tohru Nagao          tohru@cosmos.ehime-u.ac.jp
+\ FMOS  T. Nagao        TEAM ONLY             Tohru Nagao          tohru@cosmos.ehime-u.ac.jp
+\ FMOS  J. Kartaltepe   TEAM ONLY             Jeyhan Kartaltepe    jeyhan@noao.edu
+\ FMOS I. Roseboom      Public
+\ FMOS multiple PIs     TEAM ONLY             John Silverman       john.silverman@ipmu.jp
+\ MMT   Prescott        Public
+\ VUDS  O. LeFevre      TEAM ONLY             Olivier LeFevre      olivier.lefevre@lam.fr
+\                                             Lidia Tasca          lidia.tasca@lam.fr
+\                                             Lidia Tasca          lidia.tasca@lam.fr
+\ DEIMOS  2008-2012     TEAM ONLY             Nick Scoville        nzs@astro.caltech.edu
+\                       TEAM ONLY             Peter Capak          capak@ipac.caltech.edu
+\                       TEAM ONLY             Dave Sanders         sanders@ifa.hawaii.edu
+\ DEIMOS  G. Hasinger   TEAM ONLY             Guenther Hasinger    hasinger@IfA.Hawaii.Edu
+\ DEIMOS  N. Scoville   TEAM ONLY             Nick Scoville        nzs@astro.caltech.edu
+\ DEIMOS  J. Kartaltepe TEAM ONLY             Jeyhan Kartaltepe    jeyhan@noao.edu
+\ DEIMOS  M. Salvato    TEAM ONLY             Mara Salvato         mara@mpe.mpg.de
+\ DEIMOS  C. Casey      TEAM ONLY             Caitlin Casey        cmcasey@gmail.com
+\ LRIS    C. Casey      TEAM ONLY             Caitlin Casey        cmcasey@gmail.com
+\ SINFONI M. Salvato    TEAM ONLY             Mara Salvato         mara@mpe.mpg.de
+\ FAST                  Public                Nicholas Wright      nwright@head.cfa.harvard.edu
+\                                             Francesca Civano     francesca.civano@gmail.com
+\ MOSFIRE N. Scoville   TEAM ONLY             Nick Scoville        nzs@astro.caltech.edu
+\ MOSFIRE A. Shapley    Public                Alice Shapely        aes@astro.ucla.edu
+\ MOSIFRE F. Civano     TEAM ONLY             Francesca Civano     francesca.civano@gmail.com
+\                       TEAM ONLY             Benny Trakhtenbrot   benny.trakhtenbrot@phys.ethz.ch
+\ MOIRCS  M. Onodera    Public                Masato Onodera       monodera@phys.ethz.ch
+\ FORS2                 TEAM ONLY             Matt George          mgeorge@astro.berkeley.edu
+\ GMOS  C. PApovich     TEAM ONLY             Casey Papovich       papovich@tamu.edu
+\ GEMINI-S  M. Balogh   public                Michael Balogh       mbalogh@uwaterloo.ca
+\ FORS2     J. Comparat Public                Johan Comparat       johan.comparat@uam.es
+\ WFC3_GRISM            Public                Jeyhan Kartaltepe    jeyhan@noao.edu
+\                                             Kevin Schawinski     kevin.schawinski@phys.ethz.ch
+\ XSHOOTER M. Brusa     Public                Marcella Brusa       marcella.brusa3@unibo.it
+\ AZTEC   M. Yun        Public                M. Yun, V. Smolcic   myun@astro.umass.edu
+\ PRIMUS                Public                J. Aird etc          http://cass.ucsd.edu/~acoil/primus/Home.html
+\ IMACS J. Trump        Public &amp; TEAM ONLY    Jonathan Trump       jonathantrump@gmail.com
+\
+\
+\
+\
+\ Sources are sorted in RA.
+\
+\  1) Instrument
+\  2) RA  (J2000)
+\  3) DEC (J2000)
+\  4) ID from the original survey
+\  5) spectroscopic redsihft
+\     -99 no redshift found;
+\     -1  data only observed
+\     10  data available, via direct collaboration with CONTACT
+\  6) Quality flag
+\      generally as defined in zCOSMOS: in addition there is
+\      -1 data only observed
+\       5 for spectra with overlap of 2 high confidence redshifts
+\       6 for spectra where a quality flag is not provided.
+\       10 when data are taken but no redsihft nor reliability are provided
+\  7) 0.5"  match to Optical photometric redshift catalog 2008
+\      sources with -99 have no optical couterpart either because they are too faint or are in the masked area.
+\      Look at file subtracted_objects.cat in the repository for the saturated sources.
+\  8)  RA (optical ID)
+\  9)  DEC (optical ID)
+\  10)  Separation in arcsec
+\  11) Group Id : allows to know if there are more redshifts available for the same source
+\      0 for unique sources
+\  12) Group Size : identify the redshifts belonging to the same object
+\        1 for unique sources
+\  13) Contact email
+\fixlen=T
+|Instr    |ra          |dec        |ORI_ID              |z_spec   |Q_f |OPT_ID    |ra_opt      |dec_opt     |Separation |group_id   | group_size                      | Contact    |
+|char     |double      |double     |String              |double   |    |int       |double      |double      |double     |int        |int                              |char        |
+|         |degrees     |degrees    |                    |redshift |    |          |degrees     |degrees     |arcseconds |           | number                          |            |
+|         |            |           |                    |         |    |          |            |            |           |           |                                 |            |
+</DESCRIPTION>
+<PARAM arraysize="139" datatype="char" name="COMMENT" value="COSMOS2015 catalog YJHKszpp-selected photometric catalog including new SPLASH data, Y band from HSC and the second UltraVISTA dat a release">
+<DESCRIPTION>FITS COMMENT card values</DESCRIPTION>
+</PARAM>
+<PARAM arraysize="33" datatype="char" name="Match type" value="Pair match; Best match, symmetric">
+<DESCRIPTION>Type of match which created this table</DESCRIPTION>
+</PARAM>
+<PARAM arraysize="3" datatype="char" name="Match algorithm" value="Sky">
+<DESCRIPTION>Matching algorithm which created this table</DESCRIPTION>
+</PARAM>
+<PARAM arraysize="89" datatype="char" name="Join Type" value="All from 1 (An output row for each matched or unmatched row in table 1 (LEFT OUTER JOIN))">
+<DESCRIPTION>Determines which rows appear in output table</DESCRIPTION>
+</PARAM>
+<PARAM arraysize="31" datatype="char" name="First input table" value="1: COSMOS2015_Laigle+_v1.1.fits"/>
+<PARAM arraysize="47" datatype="char" name="Second input table" value="11: OBSERVED_TARGETS_15April2015_withHeader.dat"/>
+<PARAM arraysize="33" datatype="char" name="Match type" value="Pair match; Best match, symmetric">
+<DESCRIPTION>Type of match which created this table</DESCRIPTION>
+</PARAM>
+<PARAM arraysize="3" datatype="char" name="Match algorithm" value="Sky">
+<DESCRIPTION>Matching algorithm which created this table</DESCRIPTION>
+</PARAM>
+<PARAM arraysize="89" datatype="char" name="Join Type" value="All from 1 (An output row for each matched or unmatched row in table 1 (LEFT OUTER JOIN))">
+<DESCRIPTION>Determines which rows appear in output table</DESCRIPTION>
+</PARAM>
+<PARAM arraysize="31" datatype="char" name="First input table" value="4: COSMOS2015_Laigle+_v3.0.fits"/>
+<PARAM arraysize="17" datatype="char" name="Second input table" value="48: concat(45+46)"/>
+<FIELD datatype="double" name="ALPHA_J2000" unit="deg"/>
+<FIELD datatype="double" name="DELTA_J2000" unit="deg"/>
+<FIELD datatype="double" name="r_MAG_AUTO_corr">
+<DESCRIPTION>Expression: r_MAG_APER3+offset-ebv*2.660</DESCRIPTION>
+</FIELD>
+<FIELD datatype="double" name="z_cosmos">
+<DESCRIPTION>Expression: redshift</DESCRIPTION>
+</FIELD>
+<FIELD datatype="double" name="mass_cosmos">
+<DESCRIPTION>Expression: MASS_MED</DESCRIPTION>
+</FIELD>
+<!-- Dummy VOTable - no DATA element -->
+</TABLE>
+</RESOURCE>
+</VOTABLE>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           XTENSION= 'BINTABLE'           / binary table extension                         BITPIX  =                    8 / 8-bit bytes                                    NAXIS   =                    2 / 2-dimensional table                            NAXIS1  =                   40 / width of table in bytes                        NAXIS2  =                  148 / number of rows in table                        PCOUNT  =                    0 / size of special data area                      GCOUNT  =                    1 / one data group                                 TFIELDS =                    5 / number of columns                              EXTNAME = 'Joined  '           / table name                                     TTYPE1  = 'ALPHA_J2000'        / label for column 1                             TFORM1  = 'D       '           / format for column 1                            TUNIT1  = 'deg     '           / units for column 1                             TTYPE2  = 'DELTA_J2000'        / label for column 2                             TFORM2  = 'D       '           / format for column 2                            TUNIT2  = 'deg     '           / units for column 2                             TTYPE3  = 'r_MAG_AUTO_corr'    / label for column 3                             TFORM3  = 'D       '           / format for column 3                            TCOMM3  = 'Expression: r_MAG_APER3+offset-ebv*2.660'                            TTYPE4  = 'z_cosmos'           / label for column 4                             TFORM4  = 'D       '           / format for column 4                            TCOMM4  = 'Expression: redshift'                                                TTYPE5  = 'mass_cosmos'        / label for column 5                             TFORM5  = 'D       '           / format for column 5                            TCOMM5  = 'Expression: MASS_MED'                                                DATE-HDU= '2021-02-24T10:02:30' / Date of HDU creation (UTC)                    STILVERS= '3.4-2   '           / Version of STIL software                       STILCLAS= 'uk.ac.starlink.votable.FitsPlusTableWriter' / STIL Author class      END                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @b«ÊY%?˙≥∆…fÈ@3vbÊ?ªöu%F@#.˚*Æ)t@b√Ã≥#*?˚Y,ô^Ê@6de‡¥?ª]ÃcÒA @ î™‡"@bº⁄ßÉ?˚µÛÃ?l±@5íQ±í˚~?ªπåÄ   @!$ p∏œ¿@b≥•Ï;C?˚—ñî¿?@6»fÛ(?æ;Õ@   @ ØOÑM@b√h	∑i?˚Ôí?Ò⁄@5*R†ÑﬂŒ?π€"‡   @ ôöÈ$Ú(@bøqbLÊ?¸ﬂûø*8@6ëê®Hø?∫kP¿   @mëhr∞!@bºD≥4?˝Oºãñ@@6¢¥∑Õ•?Ω•†   @ -«%√ﬁË@bøíCI?˝X«)sÏ@3ç¢˜Z??ª'ª/ÏW@"ŒD˙<@bºﬁÔªÌﬂ?˝õk˚O2J@3“$÷3,˙?ª]ÃcÒA @!Õß∞≥ëí@b≈÷U8 ?˝•>'B…m@7eÍR+^ ?ΩH®ed]Œ@!%‡¥·Ω@bº’ñı”!?˝ú†›5jÁ@3ë:x 5?ª]ÃcÒA @!Àöm⁄œ@b¿“£∏ë2?˝Ï…Ô—rä@5≠Ïj4D?æ,ÈÔri@!
+Nz∑VC@b∫3ñò¡w?˝Ò≤{Ω5O@5»ÊMm±?Ω/üæv…@ 3…ÓÀ˚@b¡àã›:/?˛OM[‡#@6Ã%€TŒp?Ω≥xí„«Ê@r˛≈m\˚@b∂‹ÿÍÈ?˛t™∫æ—@4LŸÇ:?h?º/É{J#:@"Vˇ¡ﬂ@b◊ÃÙ ŒŒ?˛Çä≈~>m@4?ë :~?π∫^5?|Ó@"µ° ¿É@bæ‘√O≤?˛ä\eü¡-@5ú^∆…Æí?∫†Qô•Æ@ ∏ÂÛÄ@b¡Ø∞Èx ?ˇ	qõgL@5èGz˚—Ã?ºÓÙîÁŸ@!–(°ﬂπ@b≤ª˛óÄ?ˇk…ìS“@3˛îΩ<ﬁ?Ω!ˇ.HËß@"      @b œ*XKR?ˇ;Êñ≥K@5Ç.–“Ì?∫Òb~äu@ hÌÂKH‘@bƒ◊^ÂÒ∑?ˇ[LÿXƒÓ@7A5≥œQ¨?ædzA‘Oí@´í:)«z@bŒd≥:îì?ˇåà%,(4@3ùÀÏ<vÛ?æ¥≠FIª`@"Á®mr@b…P<°I?ˇÅãp˝ìÏ@5"cÛJIê?ªÔçó‰≤@œd9’Â@b…h}‚ÄA?ˇä±@à<@3{÷Oç;é?ªI∫^5@"Õ≥|ôÆí@b…ƒóH‰ü?ˇ∑äx_ÿ+@6óö‰T‚n?∫≤
+~¥@⁄uÕ∂Ì@b…wÜ:’?ˇª ÷¶â@68	y∫·ú?∫⁄πıY≥–@pÂ`Aâ7@b±∏O4?ˇΩdˆî≠`@2ö¥âÃ∏?ªÌ˙C˛\í@#ˇ¸]ˆU@b»ü∏Sä?ˇ‚ãÁÎÊ@3ÕÎ6yo˝?Ω5®Xy=Ÿ@!ÂÙ^N@b≈FêB£?ˇ–of[pG@52b∆«Bö?ΩÈjgQÛæ@!òåÁØ∏@b»ë´6ë?ˇÂÏR⁄”@4*‚ Y∆“?Ω„º”ZÜ@!¥˜e˝ä€@b¡£tN@ 
+ÕÄ|@3ÅıP
+|[?ªJ#9¿ÎÓ@"‚8⁄<!@bøq‘÷¿?ˇÒﬁ`˙j@7¬{∂˚?ªj◊dUj@WÊp‚¡@b‘TÄëÙ?ˇı≤ÎH@3≠0Ì ˜?π€"–Â`B@"b#·Üò@b”‹U(Ω@ ",@3jüß.ƒr?ºÆ•öX‹:@#øgÙ€ﬂè@b∂.:Â«˘@ hÏ_·ò@5–EôvåΩ?Ω»K]Ãd@ biY_Ì¶@bµeÜFﬁº@ P–Óg#ˆ@6x'8=õ?Ω¨v¿¸âˇ@À$ p∏–@b‘#ì¨v@ xµ•íˆP@4Ñ∆OlN˘?æ6¨èjñ¢@" 	,œk„@b 3":Vj@ ’ô˝Ò‘@5H£&ﬂ&?Ω!ˇ.HËß@!í:)«z@b∞óúÕ—Ö@ Ñ∞¢—@@4bI"xCÄ?ºW˚ˇÎ2>@!Õå?>@b≈â¬GŒe@ ëΩcf
+}@3π◊ ?ª6zêñº@"˝à;£D=@b¡$ƒ§À¯@ í™(∂RÒ@6œ-%^±?πˆ{Úø•ù@ã¡i¬;y@bÕé…'¢¿@ ≈2 ~ôS@7Fû∫CBö?Ω¡+¿g@§8Ö	¿@bØ JÕ∆@ ‘˘Ù%j@3¯oÔ@Ig?æ($xG@"„*c«@b–Ÿ’âõ.@+‘ã@4YÄqŒÂ?ΩËçG¶≤≤@"≥R®D@b—i€∑À@á¿@}@@5zâGaª?∫„›	∞ÿ–@#'øé`Ä@b√ÓifO•@:fY3uX@4¢‘ø
+?æHËßÊõ@"0H@·@b≈O√ñAï@?5HÃ @2"˜6¸œ?ªöu%F@#–OÙ4„@b¥Ÿˆ÷¶@Bám©‚w@6âª;ôƒ?Ω®é]@ ÉLä≈¡@b…ìofö@F6°∞X@5ÚW¸iÿ0?æ!ñRΩ<6@%Àº+îŸ@bŒóæ8î@MÜ™íCc@5Ó*…é¶°?æ´ô˜7Ñ|@ öd¬¯7µ@bƒ¥	ÚCb@eÿ÷QO£@4•ÊPGÏˇ?æûöu@"?ëÊG@b∏∂Ï¬&@yØèá@3Ëô I?º(ı¬è\)@!¯ÏïøE@b≈ }◊ßæ@∑˙°õg@3‚uÑ–?Ω≈÷8ÜYK@"3¢±pP@b»	øóÂŒ@∆#Añå@@7H–ÙªE?æ•Ò@ uÖ@"*˚ìâµ@b‘öœ›Ê@÷ÀóÅC˜@5øgùˇ!Ç?∫C˛\ë—N@ ªP∞Ú{≥@b ∂aœÔë@÷™∑|"†@5}íŸf)s?∫«À)^û@ ⁄QŒ_@bΩìµt'@·Ó-+@8ëÃß!"˚?ºwö`   @ÏA›"@b«\∆5ˆ‹@ÂfÜW∑@6â í≥P	?Ω„º”ZÜ@ãXé6è@b∫>Oo≈@Ô‰<£j.@3πª9Éud?ª•„S˜ŒŸ@"-óˆ+jË@bÃ∏ùP@˙l‹d?@4Øç¯Ã{â?º∫≤m˚‹@!Êfffff@b–?Ù—“á@.è·Âî1@6h7Bµ|?Ω
+E~9k‹@√º”ZÖà@b¿G,qú@U1dEy@4æŒ®+‰y?ΩÀà¸@!öÈ$Ú(@b∏“w‡Ç@c£´9ƒ∑@7bèH¸•?æKëx„¡Ü@	—ˆy}@b…∞'µÏ@c~-Û@à@5X‚VÇÈ?ºUZ–[!∫@"'ë>ÅE@b¬nÎ√˛√@pEfj£@3uTá≠°v?º¢%o°#@"€∂Ìgw@bªÉ‹Ù‘@påÂÒÏ'@5∆ wø?ª…≠!zí›@™–=öïB@b√”6I;\@Ü›k º8@5ÇCÒÙ5?ª/ÏV’œ´@ úÍÚQ¡î@bÃõ?©Y=@äô9ú]´@6∆yŸ{”o?ºS>¡[’i@<ËS;w@b—\rÜ@éb|Æ€@7!e3EN?º=Wycô-@¿ÈN„í‚@b«˜Xz!@ô"!•!a@4zf ˆÍu?æÜXü(y«@"LÃÃÃÃÕ@b¥
+¸l?Ñ@ìË6t˙S@4 ‹g ?æGÒ[LÅ‰@!©ã.úÀ}@b¿'q5FV@≤∏«Js"@6ñYq3ud?Ω“Ò†   @¿Énóç@b ≠EH¸v@∂€7‹@4‹
+ÜHí%?Ω;∞€)±’@!o/òsˇ¨@bƒ˙-\[@∆:î(∫S@6ÿ9/®Ñ?æ•/$Ï˙@!nπ©Á@b“5∆ÔÏ¿@—∫,2ïx@6«‚PÕt?ΩùI&èãœ@ Äç∏∫«@bæé“Èßt@„l<A÷Ÿ@6$€dcÑ#?ª‡ﬁ“àŒp@ (~|·ú@bÀ∏ ‚X`@·æÕ+tG@4F”¥–?Ωµ€øÍf@"ä¶L/É{@b∆†1≠zï@ÛºˆzVÅ@69®.9Ç?ª6zêñº@ )~+UÔ@bÃ-:5^°@∏'bVª@5:Éë≈.?ºméŒ∫bΩ@!®ı¬è\)@b—"¡†º≈@¥ª»≤≤@6ÿˆ6òCÅ?ΩrÛgñ<B@!∫JåLò@bØns˜Ö^@ï9bU†@4ÿ6cÚ?ª)^ûö@!ú8∞J∂@b ˇ†≥Ω@.∫ªDÕ@6F≈Zõ?ΩñKww±@ [Täú@bÃƒ7‚ä@>á‘Ã@6≠ﬂ≥/Dí?æ}V`   @ P%ÑÙ«@bÕ Ÿ&]@;"t\ˇ@5	≠πöÈ%?æDÖÎÁ≈!@!Í“‹±F_@bÕ⁄≈Ì∆@?zÑXY]@5"h»|1?æ=œƒM¯0@"D÷°a‰˜@bŒ∂ãtﬂ@\^>D≠@5Ê+ÜÕK?ºú}Ÿt¶@!2Ë—R@bø.ÕÚ—@l4‘çè(@4/m<»ä?ªÙá¸π#£@!œ“Ú‰è@b»''Ìéﬂ@Çô…‡≥@6ˇ£Ús÷?∫Z£ä¥$@ ¢Æ—9C@bƒã´¥ÿ@ä´|‰È¯@5√£¨≤ÒV?ª6zêñº@ $!¿D(N@bº'Àcû`@£≤fwEì@5ÔH˝?∫#9¿ÎÌ˙@ Õå*EMË@b¡`lS†2@¡TèÍS@4 YZ7>W?ΩW¨9Yg˚@!If{_@b√Ôƒ0YW@¿o¥ÕG@6LÂõ`¿?ª°ÑtôZ@#ørq6§@bø}©å4p@‘∫Ê88@6…%˜îﬁ“?ªÁlãCïÅ@ 
+>¿//ò@b¡€:›@⁄,âΩï@5pUºLp?ºp°ó@!Àº+îŸ@b–ë%∞@ÿòÜG¸õ@6î%·¬è?ªbÔ8áÖÒ@ }VlÙ@b¡¡®Å[»@ﬁ#±ºè@3™˛ÑúÜÆ?ª”√a@O@"†#Ãç„@bÕóàeÀ@≤¢™Jf@3O 1ªÆ?º∏é øì@"Ãÿò≤ÈÕ@bæ\ﬁﬁ@1l;QÌ@4W≥úòmr?ª˚µsÍ≥@!◊Fàzçe@bºÊMˆx}@¿ÿ|®x@5ˇã˝Äò?∫#w‘LÛœ@öK‚C@bÃúûWF:@]–€‘@3Î…;S?Ω˜≤(±§˛@#Í⁄πıY¥@bŒÿ·«∑‰@5èƒ!\@3"b&å¿?æw>Cáî@#ôôôôôö@bºßõÿ@T‰N¶´æ@6èHÇ∞cJ?æßÎ	X@¬ÿ¬§Tﬁ@bÃÆi8y@QdÍt%Î@3˛ı0>zc?Ω(åÁØ∏@ ¸ú#∑ï@bÀ⁄éDy.@UxKNÂ®@3“ü)≥?∫⁄πıY≥–@"Ãø±[W?@b‘Gî8≤L@ey—ozF@3¥£Ë@ç?ºwökP∞Ú@#3ZÖáìﬁ@bŒñe_¬Œ@m⁄¿¶wz@5°;˙?ª(-_xzT@ ö‚ó9m	@bª}Üàé@uDS04 @3ÿZYª˚?æp:˚~ë @"gà±Ÿ+@bŒ5¯,¡e@o;‹Q›§@2—÷˙nò?ΩΩ"äƒiß@"Áñ|ÆßH@bœÂ^˚¢√@u¬,hig@5Ås“ ñ>?∫πıY≥–}@!åŸË>B[@b∫9(÷™0@áﬂk@7Y´=¥?ºz+Îb=@_––gå @bÃﬂ¨◊Æl@ã(gJ≤@5≈¬xÊHA?æå€Ü˘⁄@!|"h	‘ï@b—?©ïX@èâû&@6ÖY«ﬂ∫‹?ªÕ°3ı@±.ÆS@bœ(óßı\@ïâ%eñ@3¯≈⁄ÒsC?∫‘,<ûÏ¿@"ôÑ†‰∂@b¿iˇ√@©xw˙,@5º/ˇFh^?πË’Å|Ao@"åùù4XÕ@bœßÖ‰CE@Øü3Õ9*@2÷÷§ÂŒ\?Ω!ˇ.HËß@#˚¸e@Ã@bÃ≠¨‘^@¨ìûf´@67*‰é&’?ºŸË>BZÓ@ÎÖ∏QÏ@b”ÔRÀãˇ@´√U¶@4ÂW™g?∫”˛Ää:<@ ≤≈z$â@bœeE>∂e@„§!◊£¥@2u[¸~>?∫⁄πıY≥–@#Ïò_ˆî@b ‰Ùõ¢@–Ï‰Æe@6¥pAÎ’g?ª?‘VY@PÔ‹ú@bµjFq¡@ÿ§”™;@6‡∞åÛ–)?∫ŒK'Ã@œ˛∞tß@bªrî≈Êƒ@Îü3ˇ,@4’0ZÆÁÇ?ºæ@Ü«ü@!.Œö,fê@b—”≠|]„@˜‰ö¨œx@6^°†¥ç?∫«À)^û@ GÈ˘rG@bœòœQ∞‚@ˆ∞W.√@2·~≈'˚?ºÌëhr∞!@"≥0j+@bŒb«ß9O@àΩûp@2;•≥¿r∞?Ω3H+Ëº@#ÃÃÃÃÃÕ@b∆ù«Np@øÙGÈb@4∆ÈÓ§Ü≠?ªÕ5®Xy>@!VÉ<`ü@b‘£ûa[@ü2dëõ@2¬(˙”˚i?∫~˘€"–Â@# ªDÂ_@bŒd‡\Ø)@)0åd@3I:ü[π8?ª^t)ùà<@"¨.3ÔÒï@b…ç∑Úò˘@(ìÎâ⁄X@5 Òf5/?æÖπÂB@! j¸Œ@bº∫÷^•@32/{ÂØ@4É∞Ï[t?æ\—Ë¶÷@!Ïª¬πMî@bÃ6YÖÎ≤@P-%Ï@8y√ÍR?º(ı¿   @◊I'ë?@b¡°L\ü@i±æª$s@6w¸
+ëÆ??Ω5®`   @∏‰∏{›@b Ôh£„Ÿ@o—8,¥@4KåZàËß?∫·GÆz·@!Ô©~+V@b«¶Õ◊@~xkOGy@2êC1O‹H?æ®WﬁünV@#Äü±@b¿€› ôV@Ñ4Õ˜D@4	¨xx“^?ªP∞Ú{≤ˇ@!°Ø:Œƒ@b‘
+s7,Y@ÇÊUF5Ü@3óÏëz?º‡uˆ˝!ˇ@"Êëß\–ª@b≤Äpeaá@≤¬Ç~gx@7Û«õ#y?º(ı¿   @ÃÃÃÃÕ@b¿ç@⁄¸ø0
+\@5AGkΩ√7?æv»¥9X@ NÉ‰%ÆÊ@b’3&Üﬂ¨@lû»Ñ‘@6Zö|^é?ºÊcÃÆ@m»uO7v@b 8[¿@Wß;7Œ@5?“˘xB?ªµsÍ≥h@!‰éäqﬁ@b∏œ¸í¿ˆ@)√‰ﬁ@5ÃBlÉg?ªüU†   @ ≥w[Å0@bæ rÚ§@'ÿÅ∑H´@3ìÆ=Ëìt?∫C”ˇ∆ı@"≥0îÇ@b¬@S^L*@/ê‡¨Æ@3Ì“gdXz?æ¥*î~&Ã@#K◊≤Î@b–%54 ÷@6˜¶∂@6
+Óg˝≈Ç?Ωÿûªóp@#±1e”ô@bª4@ıé@7~lCÄ¨@3L∑∫˚¥¢?æ@±ÀÍy±@#Êoì5“J@bπÿÌ(ºF@_∞%ô`k@5«áÂ?æ{Cò08@ Jﬂ¯"º@b…dL˛@_5÷æÑV@3À5?ªZHˇN’@"¥1zÃN˘@b”öù≥¿@k∆ìlüñ@8U÷°(·?π≥–Ä   @POãXé@bÕ‘9‹È@~#Vø@6ñä»…~g?ºr&é	C@ Õ≥|ôÆí                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                

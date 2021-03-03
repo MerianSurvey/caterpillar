@@ -2,13 +2,15 @@
 
 import os
 import copy
-import warnings
+import distutils.spawn
+
+from shutil import copyfile
 
 import numpy as np
 
 from astropy.table import Table, Column, vstack
 
-__all__ = ["remove_is_null", "moments_to_shape"]
+__all__ = ["remove_is_null", "moments_to_shape", "filter_through_bright_star_mask"]
 
 
 def remove_is_null(table, output=None, verbose=True, string='isnull', return_data=True):
@@ -111,3 +113,52 @@ def moments_to_shape(catalog, shape_type='i_sdss_shape', axis_ratio=False,
         catalog.add_column(Column(data=theta, name=theta_col))
         return catalog
     return rad, ell, theta
+
+def filter_through_bright_star_mask(catalog, mask_dir, reg_prefix='new_S18Amask',
+                                    filters='grizy', filter_type='outside',
+                                    ra='ra', dec='dec', output_suffix='bsm'):
+    """Filter the catalog through the .reg files of the bright star masks."""
+    # Make the sure venice is installed
+    venice = distutils.spawn.find_executable("venice")
+    assert venice, "Venice is not installed!"
+
+    # Get the .reg files for the bright star mask
+    reg_files = [
+        os.path.join(mask_dir, reg_prefix + '_' + band + '.reg') for band in filters]
+
+    # Output catalog
+    output_catalogs = [
+        catalog.replace('.fits', '_bsm_' + band + '.fits') for band in filters]
+
+    output_final = catalog.replace('.fits', '_%s.fits' % output_suffix)
+
+    # Generate the commands
+    for ii, reg_mask in enumerate(reg_files):
+        if ii == 0:
+            venice_command = (
+                venice + ' -m ' + reg_mask + ' -f ' + filter_type + ' -cat ' + catalog +
+                ' -xcol ' + ra + ' -ycol ' + dec + ' -o ' + output_catalogs[0]
+            )
+        else:
+            venice_command = (
+                venice + ' -m ' + reg_mask + ' -f ' + filter_type + ' -cat ' +
+                output_catalogs[ii - 1] + ' -xcol ' + ra + ' -ycol ' + dec +
+                ' -o ' + output_catalogs[ii]
+            )
+        # Execute the command
+        _ = os.system(venice_command)
+
+    # Copy the last catalog to the final name
+    if not os.path.isfile(output_catalogs[-1]):
+        raise Exception("# Something is wrong with the Venice!")
+    else:
+        _ = copyfile(output_catalogs[-1], output_final)
+
+    # Delete the intermediate catalogs
+    for output in output_catalogs:
+        try:
+            os.remove(output)
+        except OSError:
+            pass
+
+    return Table.read(output_final)
