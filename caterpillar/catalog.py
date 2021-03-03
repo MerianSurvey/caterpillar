@@ -107,9 +107,11 @@ def moments_to_shape(catalog, shape_type='i_sdss_shape', axis_ratio=False,
         catalog.add_column(Column(data=rad, name=rad_col))
         if ell_col in catalog.colnames:
             catalog.remove_column(ell_col)
+        ell = np.asarray(ell)
         catalog.add_column(Column(data=ell, name=ell_col))
         if theta_col in catalog.colnames:
             catalog.remove_column(theta_col)
+        theta = np.asarray(theta)
         catalog.add_column(Column(data=theta, name=theta_col))
         return catalog
     return rad, ell, theta
