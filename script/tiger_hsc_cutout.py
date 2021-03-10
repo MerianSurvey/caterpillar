@@ -224,7 +224,7 @@ def build_cutout_wcs(coord, cutouts, index, origins):
 
     return afwGeom.makeSkyWcs(wcs_header)
 
-def generate_cutout(butler, skymap, ra, dec, band='i', label='deepCoadd_skyMap',
+def generate_cutout(butler, skymap, ra, dec, band='i', label='deepCoadd_calexp',
                     radius=10.0 * u.arcsec, psf=True, verbose=False):
     """Generate a single cutout image.
     """
@@ -359,7 +359,7 @@ def prepare_catalog(cat, size, band, ra='ra', dec='dec', name=None, unit='arcsec
         size_arr = [s * u.Unit(unit) for s in size_arr]
 
     return QTable(
-        [name_arr, ra_arr, dec_arr, size_arr],
+        [name_arr, list(ra_arr), list(dec_arr), size_arr],
         names=('prefix', 'ra', 'dec', 'radius')
     )
 
