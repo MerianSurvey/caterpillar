@@ -52,38 +52,42 @@ def visual_ccd(ccd, exp_hdr, fig_dir=None, dpi=100, contrast=0.9,
     # Header information from the exposure
     exp_name = exp_hdr['DTNSANAM'].split('.')[0]
     exp_time = int(exp_hdr['EXPTIME'])
+    exp_type = exp_hdr['PROCTYPE'].strip()
 
-    # Get the data and overscan regions of amplifier A & B
-    data_a = get_ccd_section(img, hdr, 'DATASECA')
-    data_b = get_ccd_section(img, hdr, 'DATASECB')
+    if exp_type == 'raw':
+        # Get the data and overscan regions of amplifier A & B
+        data_a = get_ccd_section(img, hdr, 'DATASECA')
+        data_b = get_ccd_section(img, hdr, 'DATASECB')
 
-    bias_a = get_ccd_section(img, hdr, 'BIASSECA')
-    bias_b = get_ccd_section(img, hdr, 'BIASSECA')
+        bias_a = get_ccd_section(img, hdr, 'BIASSECA')
+        bias_b = get_ccd_section(img, hdr, 'BIASSECA')
 
-    gain_a, rdn_a = hdr['GAINA'], hdr['RDNOISEA']
-    gain_b, rdn_b = hdr['GAINB'], hdr['RDNOISEB']
+        gain_a, rdn_a = hdr['GAINA'], hdr['RDNOISEA']
+        gain_b, rdn_b = hdr['GAINB'], hdr['RDNOISEB']
 
-    data_a_cor = (data_a * gain_a) - rdn_a
-    data_b_cor = (data_b * gain_b) - rdn_b
+        data_a_cor = (data_a * gain_a) - rdn_a
+        data_b_cor = (data_b * gain_b) - rdn_b
 
-    bias_a_cor = (bias_a * gain_a) - rdn_a
-    bias_b_cor = (bias_b * gain_b) - rdn_b
+        bias_a_cor = (bias_a * gain_a) - rdn_a
+        bias_b_cor = (bias_b * gain_b) - rdn_b
 
-    # A very naive overscane "correction"
-    data_a_cor = data_a_cor - np.nanmedian(bias_a_cor)
-    data_b_cor = data_b_cor - np.nanmedian(bias_b_cor)
+        # A very naive overscane "correction"
+        data_a_cor = data_a_cor - np.nanmedian(bias_a_cor)
+        data_b_cor = data_b_cor - np.nanmedian(bias_b_cor)
 
-    mean_a = np.nanmean(
-        sigma_clip(data_a_cor.flatten(), sigma=2.5, maxiters=3))
-    mean_b = np.nanmean(
-        sigma_clip(data_b_cor.flatten(), sigma=2.5, maxiters=3))
+        mean_a = np.nanmean(
+            sigma_clip(data_a_cor.flatten(), sigma=2.5, maxiters=3))
+        mean_b = np.nanmean(
+            sigma_clip(data_b_cor.flatten(), sigma=2.5, maxiters=3))
 
-    data_b_cor += (mean_a - mean_b)
+        data_b_cor += (mean_a - mean_b)
 
-    if (hdr['EXTNAME'][0] == 'S') or (hdr['EXTNAME'][0] == 'F'):
-        img_new = np.vstack([data_b_cor, data_a_cor])
-    else:
-        img_new = np.vstack([data_a_cor, data_b_cor])
+        if (hdr['EXTNAME'][0] == 'S') or (hdr['EXTNAME'][0] == 'F'):
+            img_new = np.vstack([data_b_cor, data_a_cor])
+        else:
+            img_new = np.vstack([data_a_cor, data_b_cor])
+    elif exp_type == 'InstCal':
+        img_new = img
 
     x_size, y_size = img_new.shape
     x_fig, y_fig = int(x_size / dpi), int(y_size / dpi) + 0.2
@@ -115,6 +119,7 @@ def visual_exposure_ccds(exp_file, fig_dir=None, dpi=100, contrast=0.9,
     """Visual check of an exposure."""
     exp = fits.open(exp_file)
     exp_hdr = exp[0].header
+
 
     for ccd_id in np.arange(len(exp))[1:]:
         visual_ccd(exp[ccd_id], exp_hdr, fig_dir=fig_dir,
