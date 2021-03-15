@@ -100,7 +100,6 @@ def display_single(img,
             try:
                 vmin, vmax = ZScaleInterval(contrast=contrast).get_limits(img_scale)
             except IndexError:
-                # TODO: Deal with problematic image
                 vmin, vmax = -1.0, 1.0
         elif scale.strip() == 'percentile':
             try:
@@ -108,7 +107,6 @@ def display_single(img,
                     lower_percentile=lower_percentile,
                     upper_percentile=upper_percentile).get_limits(img_scale)
             except IndexError:
-                # TODO: Deal with problematic image
                 vmin, vmax = -1.0, 1.0
         elif scale.strip() == 'minmax':
             vmin, vmax = np.nanmin(img_scale), np.nanmax(img_scale)

@@ -36,10 +36,18 @@ def visual_ccd(ccd, exp_hdr, fig_dir=None, dpi=100, contrast=0.9,
                cmap='coolwarm', **kwargs):
     """Visualize a single CCD."""
 
+    # Header information from the exposure
+    exp_name = exp_hdr['DTNSANAM'].split('.')[0]
+    exp_time = int(exp_hdr['EXPTIME'])
+    exp_type = exp_hdr['PROCTYPE'].strip().lower()
+
     # Data and header information from CCD
     img = ccd.data.T
     hdr = ccd.header
-    ccd_id = hdr['EXTNAME'].strip() + '_' + str(hdr['CCDNUM'])
+    if exp_type == 'stacked':
+        ccd_id = hdr['EXTNAME'].strip()
+    else:
+        ccd_id = hdr['EXTNAME'].strip() + '_' + str(hdr['CCDNUM'])
 
     # Skip N30 CCD
     if hdr['EXTNAME'].strip() == 'N30':
@@ -48,11 +56,6 @@ def visual_ccd(ccd, exp_hdr, fig_dir=None, dpi=100, contrast=0.9,
     # Skip focus CCDs
     if hdr['EXTNAME'].strip()[0] == 'F':
         return
-
-    # Header information from the exposure
-    exp_name = exp_hdr['DTNSANAM'].split('.')[0]
-    exp_time = int(exp_hdr['EXPTIME'])
-    exp_type = exp_hdr['PROCTYPE'].strip()
 
     if exp_type == 'raw':
         # Get the data and overscan regions of amplifier A & B
@@ -86,7 +89,7 @@ def visual_ccd(ccd, exp_hdr, fig_dir=None, dpi=100, contrast=0.9,
             img_new = np.vstack([data_b_cor, data_a_cor])
         else:
             img_new = np.vstack([data_a_cor, data_b_cor])
-    elif exp_type == 'InstCal':
+    elif exp_type == 'instcal' or exp_type == 'stacked':
         img_new = img
 
     x_size, y_size = img_new.shape
@@ -114,12 +117,11 @@ def visual_ccd(ccd, exp_hdr, fig_dir=None, dpi=100, contrast=0.9,
 
     plt.close(fig)
 
-def visual_exposure_ccds(exp_file, fig_dir=None, dpi=100, contrast=0.9,
-                         cmap='coolwarm', **kwargs):
+def visual_exposure(exp_file, fig_dir=None, dpi=100, contrast=0.9,
+                    cmap='coolwarm', **kwargs):
     """Visual check of an exposure."""
     exp = fits.open(exp_file)
     exp_hdr = exp[0].header
-
 
     for ccd_id in np.arange(len(exp))[1:]:
         visual_ccd(exp[ccd_id], exp_hdr, fig_dir=fig_dir,
