@@ -7,11 +7,15 @@ import distutils.spawn
 from shutil import copyfile
 
 import numpy as np
+import healpy as hp
 
+from astropy.wcs import WCS
 from astropy.table import Table, Column, vstack
 
-__all__ = ["remove_is_null", "moments_to_shape", "filter_through_bright_star_mask"]
+__all__ = ["remove_is_null", "moments_to_shape", "filter_through_bright_star_mask",
+           "ReferenceCatalog", "PS1_PATTERN"]
 
+PS1_PATTERN = 'ps1-{:05d}.fits'
 
 def remove_is_null(table, output=None, verbose=True, string='isnull', return_data=True):
     """
@@ -176,3 +180,100 @@ def add_chunk_id(catalog):
     catalog.add_column(Column(data=chunks, name='chunk_id'))
 
     return catalog
+
+class ReferenceCatalog():
+    """
+    Photometric or astrometric reference catalog.
+    """
+    def __init__(self, fits_dir, fits_pattern, nside=32, indexing='ring'):
+        """
+        fits_pattern: string formatter with key "hp", e.g., 'dir/fn-%(hp)05i.fits'
+        """
+        self.fits_dir = fits_dir
+        self.fits_pattern = os.path.join(fits_dir, fits_pattern)
+        self.nside = nside
+        self.indexing = indexing
+
+    def get_catalogs(self, pixels):
+        """
+        Get the reference star catalogs.
+        """
+        ref_cats = []
+        for pix in pixels:
+            ref_cats.append(Table.read(self.fits_pattern.format(pix)))
+
+        return vstack(ref_cats)
+
+    def get_hp_pixles(self, ra_arr, dec_arr):
+        """
+        Get the healpix pixels that cover the (RA, Dec) ranges.
+        """
+        hp_pixels = set()
+
+        # TODO: This is only for ring indexing
+        for rr, dd in zip(ra_arr, dec_arr):
+            hp_pixels.add(
+                hp.pixelfunc.ang2pix(self.nside, rr, dd, lonlat=True, nest=False))
+
+        return hp_pixels
+
+    def get_stars_radec(self, ra_range, dec_range, step=100, margin=0.1):
+        """
+        Get the reference stars within a (RA, Dec) range.
+        """
+        ra_min, ra_max = np.min(ra_range) - margin, np.max(ra_range) - margin
+        dec_min, dec_max = np.min(dec_range) - margin, np.max(dec_range) - margin
+
+        ra_arr, dec_arr = np.meshgrid(
+            np.linspace(ra_min, ra_max, int((ra_max - ra_min) / step)),
+            np.linspace(dec_min, dec_max, int((dec_max - dec_min) / step))
+        )
+
+        # Get the healpix pixels
+        pixels = self.get_hp_pixles(ra_arr, dec_arr)
+
+        # Gather the reference stars
+        cat = self.get_catalogs(pixels)
+
+        return cat
+
+    def get_stars_hdu(self, hdu, step=100, margin=10, box_cut=True,
+                      ra_col='RA', dec_col='DEC', box_margin=20):
+        """
+        Get the reference stars based on a FITS HDU.
+        """
+        # Header of the HDU
+        hdu_wcs = WCS(hdu.header)
+
+        # Dimension of the image
+        dec_size, ra_size = hdu_wcs.array_shape
+
+        # Build a grid of (X, Y) coordinate
+        xx_arr, yy_arr = np.meshgrid(
+            np.linspace(1 - margin, ra_size + margin, 2 + int((ra_size + 2 * margin) / step)),
+            np.linspace(1 - margin, dec_size + margin, 2 + int((dec_size + 2 * margin) / step)))
+
+        # (RA, Dec) grid
+        ra_arr, dec_arr = hdu_wcs.all_pix2world(xx_arr.ravel(), yy_arr.ravel(), 1)
+
+        # Get the healpix pixels
+        pixels = self.get_hp_pixles(ra_arr, dec_arr)
+
+        # Gather the reference stars
+        cat = self.get_catalogs(pixels)
+
+        # Make a box cut
+        if box_cut:
+            ra_min, ra_max = ra_arr.min(), ra_arr.max()
+            dec_min, dec_max = dec_arr.min(), dec_arr.max()
+            ra_sep = (ra_max - ra_min) / box_margin
+            dec_sep = (dec_max - dec_min) / box_margin
+
+            cat = cat[
+                (cat[ra_col] > ra_min - ra_sep) &
+                (cat[ra_col] < ra_max + ra_sep) &
+                (cat[dec_col] > dec_min - dec_sep) &
+                (cat[dec_col] < dec_max + dec_sep)
+            ]
+
+        return cat
