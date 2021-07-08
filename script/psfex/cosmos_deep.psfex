@@ -1,10 +1,10 @@
-# Default configuration file for PSFEx 3.22.1
+ # Default configuration file for PSFEx 3.22.1
 # EB 2021-03-18
 #
  
 #-------------------------------- PSF model ----------------------------------
  
-BASIS_TYPE      NONE      # NONE, PIXEL, GAUSS-LAGUERRE or FILE
+BASIS_TYPE      NONE            # NONE, PIXEL, GAUSS-LAGUERRE or FILE
 BASIS_NUMBER    20              # Basis number or parameter
 BASIS_NAME      basis.fits      # Basis filename (FITS data-cube)
 BASIS_SCALE     1.0             # Gauss-Laguerre beta parameter
@@ -38,7 +38,7 @@ STABILITY_TYPE  EXPOSURE        # EXPOSURE or SEQUENCE
  
 SAMPLE_AUTOSELECT  Y            # Automatically select the FWHM (Y/N) ?
 SAMPLEVAR_TYPE     SEEING       # File-to-file PSF variability: NONE or SEEING
-SAMPLE_FWHMRANGE   0.4,5.0     # Allowed FWHM range
+SAMPLE_FWHMRANGE   0.4,5.0      # Allowed FWHM range
 SAMPLE_VARIABILITY 0.2          # Allowed FWHM variability (1.0 = 100%)
 SAMPLE_MINSN       20           # Minimum S/N for a source to be used
 SAMPLE_MAXELLIP    0.3          # Maximum (A-B)/(A+B) for a source to be used
@@ -47,11 +47,20 @@ SAMPLE_WFLAGMASK   0x0000       # Rejection mask on SExtractor FLAGS_WEIGHT
 SAMPLE_IMAFLAGMASK 0x0          # Rejection mask on SExtractor IMAFLAGS_ISO
 BADPIXEL_FILTER    Y            # Filter bad-pixels in samples (Y/N) ?
 BADPIXEL_NMAX      0            # Maximum number of bad pixels allowed
+ 
+#----------------------- PSF homogeneisation kernel --------------------------
+
+HOMOBASIS_TYPE     NONE         # NONE or GAUSS-LAGUERRE
+HOMOBASIS_NUMBER   10           # Kernel basis number or parameter
+HOMOBASIS_SCALE    1.0          # GAUSS-LAGUERRE beta parameter
+HOMOPSF_PARAMS     2.0, 3.0     # Moffat parameters of the idealised PSF
+HOMOKERNEL_DIR                  # Where to write kernels (empty=same as input)
+HOMOKERNEL_SUFFIX  .homo.fits   # Filename extension for homogenisation kernels
 
 #----------------------------- Output catalogs -------------------------------
 
 OUTCAT_TYPE        FITS_LDAC         # NONE, ASCII_HEAD, ASCII, FITS_LDAC
-OUTCAT_NAME        cosmos_psfex_out.fits  # Output catalog filename
+OUTCAT_NAME        psfex_out.fits  # Output catalog filename
 
 #------------------------------- Check-plots ----------------------------------
  
