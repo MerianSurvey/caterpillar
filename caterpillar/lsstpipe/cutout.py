@@ -9,6 +9,7 @@ But upgraded to the Gen3 middleware
 import os
 import shutil
 import argparse
+import warnings
 
 from datetime import date
 
@@ -20,20 +21,23 @@ from astropy.table import Table, QTable
 from joblib import Parallel, delayed
 from spherical_geometry.polygon import SphericalPolygon
 
-import lsst.log
-Log = lsst.log.Log()
-Log.setLevel(lsst.log.ERROR)
+try:
+    import lsst.log
+    Log = lsst.log.Log()
+    Log.setLevel(lsst.log.ERROR)
 
-import lsst.daf.butler as dafButler
+    import lsst.daf.butler as dafButler
 
-import lsst.daf.base
-import lsst.geom as geom
-import lsst.afw.image as afwImage
-import lsst.afw.geom as afwGeom
-import lsst.afw.coord as afwCoord
+    import lsst.daf.base
+    import lsst.geom as geom
+    import lsst.afw.image as afwImage
+    import lsst.afw.geom as afwGeom
+    import lsst.afw.coord as afwCoord
 
-import lsst.afw.display
-import lsst.afw.display.rgb as afwRgb
+    import lsst.afw.display
+    import lsst.afw.display.rgb as afwRgb
+except ImportError:
+    warnings.warn("lsstPipe is not installed. Please install it first.")
 
 MERIAN_REPO = '/projects/MERIAN/repo'
 S18A_WIDE_ROOT = '/tigress/HSC/DR/s18a_wide'
@@ -169,6 +173,40 @@ def _prepare_input_cat(input_cat, half_size, unit, ra_col, dec_col, band, id_col
                 prefix, today.year, today.month, today.day)), overwrite=True)
     
     return sample
+
+
+def sky_cone(ra_c, dec_c, theta, steps=50, include_center=True):
+    """
+    Get ra and dec coordinates of a cone on the sky.
+
+    Parameters
+    ----------
+    ra_c, dec_c: float
+        Center of cone in degrees.
+    theta: astropy Quantity, float, or int
+        Angular radius of cone. Must be in arcsec
+        if not a Quantity object.
+    steps: int, optional
+        Number of steps in the cone.
+    include_center: bool, optional
+        If True, include center point in cone.
+
+    Returns
+    -------
+    ra, dec: ndarry
+        Coordinates of cone.
+    """
+    if isinstance(theta, float) or isinstance(theta, int):
+        theta = theta * u.Unit('arcsec')
+
+    cone = SphericalPolygon.from_cone(
+        ra_c, dec_c, theta.to('deg').value, steps=steps)
+    ra, dec = list(cone.to_lonlat())[0]
+    ra = np.mod(ra - 360., 360.0)
+    if include_center:
+        ra = np.concatenate([ra, [ra_c]])
+        dec = np.concatenate([dec, [dec_c]])
+    return ra, dec
 
 
 def catalog_cutout(input_cat, root, collection, band, half_size=10, unit='arcsec', psf=True, data_type='deepCoadd_calexp',
