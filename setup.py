@@ -39,9 +39,18 @@ setup(
     author_email='dr.guangtou@gmail.com',
     license='MIT',
     packages=find_packages(),
+    package_dir={'caterpillar': 'caterpillar'},
     package_data={
         'caterpillar': 
-            ["data/filters/decam/*", "data/filters/merian/*", "data/stellar/*"]
+            ["data/filters/decam/*", 
+             "data/filters/hsc/*", 
+             "data/filters/ps1/*", 
+             "data/filters/merian/*", 
+             "data/filters/merian/n540/*", 
+             "data/filters/merian/n708/*", 
+             "data/decam/*",
+             "data/sql/*",
+             "data/stellar/*"]
     },
     install_requires=INSTALL_REQUIRES,
     include_package_data=True,

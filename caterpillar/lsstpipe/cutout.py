@@ -28,7 +28,6 @@ import lsst.daf.butler as dafButler
 
 import lsst.daf.base
 import lsst.geom as geom
-import lsst.daf.persistence as dafPersist
 import lsst.afw.image as afwImage
 import lsst.afw.geom as afwGeom
 import lsst.afw.coord as afwCoord
@@ -44,47 +43,133 @@ def _prepare_dataset(root, collection):
     """
     Get the butler for the given dataset and return the skyMap object.
     """
-    butler = dafPersist.Butler(root, collection=collection)
+    butler = dafButler.Butler(root, collection=collection)
     return butler, butler.get('skyMap')
 
-def _prepare_input_cat(input_cat, half_size, unit, ra_col, dec_col, id_col, prefix, output_dir):
+def _get_ra_dec_name(id_arr, ra_arr, dec_arr):
+    """Get the object name based on ID and (RA, Dec)."""
+    return [
+        "{:s}_{:s}_{:s}_{:s}".format(
+            str(i), "{:8.4f}".format(ra).strip(), "{:8.4f}".format(dec).strip()
+            ) for (i, ra, dec) in zip(id_arr, ra_arr, dec_arr)]
+
+def _get_file_prefix(name_arr, band, prefix):
+    """Get the prefix of the output files based on the ID."""
+    if prefix is None:
+        return ["{:s}_{:s}".format(str(name), band) for name in name_arr]
+    else:
+        return ["{:s}_{:s}_{:s}".format(prefix, str(name), band) for name in name_arr]
+
+def _get_output_dir(output_dir, chunk_arr, name_arr):
+    """Get the directory for the output cutout data."""
+    # Check the output directory
+    if not os.path.isdir(output_dir):
+        raise ValueError("Output directory '{:s}' does not exist".format(output_dir))
+    
+    return [os.path.join(output_dir, str(chunk), str(name)) for (chunk, name) in zip(chunk_arr, name_arr)]
+    
+def _get_int_chunk(data, n_chunk):
+    """Assign integer chunk ID to the data."""
+    if n_chunk > len(data):
+        raise ValueError("Too many chunks...")
+    if n_chunk <= 0:
+        raise ValueError("Chunk number has to be larger than 0...")
+    
+    chunk_arr = np.ones(len(data), dtype=int)
+    if n_chunk == 1:
+        return chunk_arr
+    
+    chunk_size = np.ceil(len(data) / n_chunk).astype(int)
+
+    start, end = 0, chunk_size
+    for i in np.arange(n_chunk):
+        chunk_arr[start: end] = i + 1
+        start, end = end, end + chunk_size 
+        end = len(data) if end > len(data) else end
+    
+    return chunk_arr
+
+def _prepare_input_cat(input_cat, half_size, unit, ra_col, dec_col, band, id_col, chunk, 
+                       prefix, output_dir, save=True):
     """
     Prepare the input sample for the given dataset.
+    
+    The cutouts are organized into:
+        [output_dir]/[chunk_id]/[galaxy_id]/[file_name].fits
+    And the file name prefix is: 
+        ([prefix]_[galaxy_id]_[band]
     """
     # Load the input catalog
     if isinstance(input_cat, str):
         input_cat = Table.read(input_cat)
 
-    # Check the half size unit
-    if unit.strip() not in ['arcsec', 'arcmin', 'degree', 'pixel']:
-        raise ValueError("Wrong size unit. [arcsec, arcmin, degree, pixel]")
+    # Get an array for half size
+    if isinstance(half_size, str):
+        if half_size.strip() not in input_cat.colnames:
+            raise ValueError("Wrong half size column name. [{:s}]".format(half_size))
+        half_size_arr = input_cat[half_size]
+    else:
+        # Using the same size for all objects
+        half_size_arr = np.full(len(input_cat), float(half_size))
+    
+    if np.any(half_size_arr < 0):
+        raise ValueError("Negative size value.")
+    
+    # Add size unit if necessary
+    if unit != 'pixel' and half_size_arr.unit is None:
+        # Check the half size unit
+        if unit.strip() not in ['arcsec', 'arcmin', 'degree', 'pixel']:
+            raise ValueError("Wrong size unit. [arcsec, arcmin, degree, pixel]")
+        half_size_arr = [s * u.Unit(unit) for s in half_size_arr]
 
-
-    # Check the column names
+    # Get the RA and DEC arrays
     if ra_col not in input_cat.colnames:
-        raise ValueError("Column '{:s}' not found in the input catalog".format(ra_col))
+        raise ValueError("Wrong R.A. column name. [{:s}]".format(ra_col))
     if dec_col not in input_cat.colnames:
-        raise ValueError("Column '{:s}' not found in the input catalog".format(dec_col))
-    if id_col not in input_cat.colnames:
-        raise ValueError("Column '{:s}' not found in the input catalog".format(id_col))
+        raise ValueError("Wrong Dec column name. [{:s}]".format(dec_col))
+    ra_arr, dec_arr = input_cat[ra_col], input_cat[dec_col]
+    
+    # Get the output directory and file name 
+    
+    # Get the object id or name
+    if id_col is None:
+        name_arr = _get_ra_dec_name(np.arange(len(ra_arr)) + 1, ra_arr, dec_arr)
+    else:
+        if id_col not in input_cat.colnames:
+            raise ValueError("Wrong ID column name. [{:s}]".format(id_col))
+        name_arr = input_cat[id_col]
+    
+    # Get the output file prefix 
+    prefix_arr = _get_file_prefix(name_arr, band, prefix)
+    
+    # Get the directory of the output file
+    if chunk is not None:
+        if isinstance(chunk, str):
+            if chunk not in input_cat.colnames:
+                raise ValueError("Wrong Chunk column name. [{:s}]".format(chunk))
+            chunk_arr = input_cat[chunk]
+        else:
+            chunk_arr = _get_int_chunk(input_cat, int(chunk))
+    else:
+        chunk_arr = None
+        
+    # Get the output file directory
+    dir_arr = _get_output_dir(output_dir, chunk_arr, name_arr)
 
-    # Check the unit
-    if unit is not None:
-        if unit not in input_cat.colnames:
-            raise ValueError("Column '{:s}' not found in the input catalog".format(unit))
-    # Check the half size
-    if half_size is not None:
-        if half_size < 0:
-            raise ValueError("The half size must be positive")
-    # Check the output directory
-    if not os.path.isdir(output_dir):
-        raise ValueError("Output directory '{:s}' does not exist".format(output_dir))
-    # Check the prefix
-    if prefix is not None:
-        if prefix == '':
-            raise ValueError("The prefix cannot be empty")
-    # Return the prepared catalog
-    return input_cat, half_size, unit, ra_col, dec_col, id_col, prefix, output_dir
+    sample = QTable(
+        [name_arr, prefix_arr, dir_arr, chunk_arr, list(ra_arr), list(dec_arr), half_size_arr],
+        names=('name', 'prefix', 'dir', 'chunk', 'ra', 'dec', 'half_size')
+    )
+
+    if save:
+        today = date.today()
+        prefix = 'postamps' if prefix is None else prefix
+        sample.write(
+            os.path.join(output_dir, "{:s}-{:4d}-{:02d}-{:02d}.fits".format(
+                prefix, today.year, today.month, today.day)), overwrite=True)
+    
+    return sample
+
 
 def catalog_cutout(input_cat, root, collection, band, half_size=10, unit='arcsec', psf=True, data_type='deepCoadd_calexp',
                    output_dir='./', prefix=None, ra_col='ra', dec_col='dec', id_col='id', chunk=None):
@@ -133,37 +218,7 @@ def catalog_cutout(input_cat, root, collection, band, half_size=10, unit='arcsec
     butler, skyMap = _prepare_dataset(root, collection)
 
     # Prepare the input catalog
-    sample = _prepare_input_cat(input_cat, half_size, unit, ra_col, dec_col, id_col, prefix, output_dir)
+    sample = _prepare_input_cat(
+        input_cat, half_size, unit, ra_col, dec_col, band, id_col, chunk, prefix, output_dir)
 
 
-    if isinstance(half_size, str):
-        half_size = input_cat[half_size]
-
-    if unit == 'arcsec':
-        half_size = half_size * u.arcsec
-    elif unit == 'pixel':
-        half_size = half_size * u.pixel
-    else:
-        raise ValueError('Unknown unit: {}'.format(unit))
-
-    if prefix is None:
-        prefix = '{}_{}'.format(band, half_size)
-
-    if chunk is None:
-        chunk = 1
-    chunk_size = int(len(input_cat) / chunk)
-
-    for i in range(chunk):
-        chunk_cat = input_cat[i*chunk_size:(i+1)*chunk_size]
-        chunk_cat = chunk_cat[np.isfinite(chunk_cat[ra_col]) & np.isfinite(chunk_cat[dec_col])]
-        chunk_cat = chunk_cat[np.abs(chunk_cat[ra_col]) < 360]
-        chunk_cat = chunk_cat[np.abs(chunk_cat[dec_col]) < 180]
-
-        if len(chunk_cat) == 0:
-            continue
-
-        # Get the dataIds
-        dataIds = []
-        for row in chunk_cat:
-            dataId = dict(instrument='HSC', detector=band, 
-    """
