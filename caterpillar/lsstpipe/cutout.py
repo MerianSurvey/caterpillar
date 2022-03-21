@@ -106,7 +106,7 @@ def _prepare_input_cat(input_cat, half_size, unit, ra_col, dec_col, band, id_col
     """
     # Load the input catalog
     if isinstance(input_cat, str):
-        input_cat = Table.read(input_cat)
+        input_cat = QTable.read(input_cat)
 
     # Get an array for half size
     if isinstance(half_size, str):
@@ -515,4 +515,4 @@ def test_cutout():
     # Retrieve the Patches that cover the cutout region
     img_patches = _get_patches(butler, skymap, radec_list, band, data_type=data_type)
 
-    return img_patches
+    return sample, img_patches
