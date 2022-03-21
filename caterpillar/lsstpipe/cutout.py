@@ -261,7 +261,6 @@ def get_tract_patch_list(coord_list, skymap):
 
     return np.array(ids, dtype=[('tract', int), ('patch', int)])
 
-
 def _get_patches(butler, skymap, coord_list, band, data_type='deepCoadd'):
     """
     Retrieve the data products for all the patches that overlap with the coordinate.
@@ -429,8 +428,7 @@ def generate_cutout(butler, skymap, ra, dec, band='N708', data_type='deepCoadd',
         return cutout, psf
     return cutout
 
-
-def catalog_cutout(input_cat, root, collections, band, half_size=10, unit='arcsec', psf=True, data_type='deepCoadd_calexp',
+def prepare_sample(input_cat, root, collections, ready=False, save=True, half_size=10, unit='arcsec',
                    output_dir='./', prefix=None, ra_col='ra', dec_col='dec', id_col='id', chunk=None):
     """
     Generate cutout/postamps for objects in a catalog using coadd images reduced by `lsstPipe`.
@@ -469,19 +467,19 @@ def catalog_cutout(input_cat, root, collections, band, half_size=10, unit='arcse
         Number of chunks to split the catalog into.
     """
 
-    # Check the required data type
-    if data_type.strip() not in ['deepCoadd', 'deepCoadd_calexp', 'deepCoadd_background', 'deepCoadd_calexp_background']:
-        raise ValueError("Wrong coadd type. [deepCoadd, deepCoadd_calexp, deepCoadd_background, deepCoadd_calexp_background]")
-
     # Get the butler for the given dataset and return the skyMap object.
     butler, skymap = _prepare_dataset(root, collections)
 
     # Prepare the input catalog
-    sample = _prepare_input_cat(
-        input_cat, half_size, unit, ra_col, dec_col, band, id_col, chunk, prefix, output_dir, save=False)
+    if not ready:
+        sample = _prepare_input_cat(
+            input_cat, half_size, unit, ra_col, dec_col, id_col, chunk, prefix, output_dir, save=save)
+    else:
+        sample = QTable.read(input_cat)
+    
+    return butler, skymap, sample
 
-
-def cutout_one(butler, skymap, obj, band, data_type, psf, verbose=True):
+def cutout_one(butler, skymap, obj, band, data_type, psf, verbose):
     """Generate cutout for a single object.
     """
     prefix, dir, ra, dec, half_size = (
@@ -505,29 +503,59 @@ def cutout_one(butler, skymap, obj, band, data_type, psf, verbose=True):
         cutout.writeFits(os.path.join(dir, "{:s}_{:s}_{:s}.fits".format(prefix, band, data_type)))
 
 
+def cutout_batch(input_cat, root, collections, band, njobs=1, psf=True, ready=False, save=True, half_size=10, 
+                 unit='arcsec', data_type='deepCoadd', output_dir='./', prefix=None, ra_col='ra', dec_col='dec', 
+                 id_col='id', chunk=None, verbose=False):
+    """
+    """
+    # Prepare the butler, skymap, and the sample.
+    butler, skymap, sample = prepare_sample(
+        input_cat, root, collections, ready=ready, save=save, half_size=half_size, unit=unit,
+        output_dir=output_dir, prefix=prefix, ra_col=ra_col, dec_col=dec_col, id_col=id_col, chunk=chunk) 
+
+    # Check the required data type
+    if data_type.strip() not in ['deepCoadd', 'deepCoadd_calexp', 'deepCoadd_background', 'deepCoadd_calexp_background']:
+        raise ValueError("Wrong coadd type. [deepCoadd, deepCoadd_calexp, deepCoadd_background, deepCoadd_calexp_background]")
+    
+    if njobs <= 1:
+        _ = [cutout_one(butler, skymap, obj, band, data_type, psf, verbose) for obj in sample]
+    else:
+        Parallel(n_jobs=njobs)(delayed(cutout_one)(butler, skymap, obj, band, data_type, psf, verbose) for obj in sample)
+    
+
 def test_cutout():
     """
     Test the cutout function.
     """
-    input_cat = '/home/sh19/work/cosmos-2022-02-17.fits'
-
     root = '/projects/MERIAN/repo'
+    output = '/tigress/MERIAN/poststamps/g09_broadcut'
+
     n708 = 'DECam/runs/merian/w_2022_02/t9813_deep_N708'
     n540 = 'DECam/runs/merian/w_2022_02/t9813_deep_N540'
 
+    input_cat = os.path.join(output, 'g09_broadcut_cosmos-2022-03-21.fits')
+
     data_type='deepCoadd'
 
+    _ = cutout_batch(
+        input_cat, root, n708, 'N708', njobs=4, psf=True, ready=True, save=False, half_size='half_size',
+        unit='arcsec', data_type=data_type, output_dir=output, prefix='g09_broadcut', chunk=90)
+
+    _ = cutout_batch(
+        input_cat, root, n540, 'n540', njobs=4, psf=True, ready=True, save=False, half_size='half_size',
+        unit='arcsec', data_type=data_type, output_dir=output, prefix='g09_broadcut', chunk=90)
+
     # Prepare the input catalog
-    sample = _prepare_input_cat(
-        input_cat, 'half_size', 'arcsec', 'ra', 'dec', 'name', 20, 'cosmos-test', '/home/sh19/work/test', save=True)
+    #sample = _prepare_input_cat(
+    #    input_cat, 'half_size', 'arcsec', 'ra', 'dec', 'name', 20, 'cosmos-test', '/home/sh19/work/test', save=True)
 
-    butler_n708, skymap = _prepare_dataset(root, n708)
+    #butler_n708, skymap = _prepare_dataset(root, n708)
 
-    _ = [cutout_one(butler_n708, skymap, obj, 'N708', data_type, psf=True) for obj in sample[-50:]]
+    #_ = [cutout_one(butler_n708, skymap, obj, 'N708', data_type, True, True) for obj in sample[-50:]]
 
-    butler_n540, skymap = _prepare_dataset(root, n540)
+    #butler_n540, skymap = _prepare_dataset(root, n540)
 
-    _ = [cutout_one(butler_n540, skymap, obj, 'n540', data_type, psf=True) for obj in sample[-50:]]
+    #_ = [cutout_one(butler_n540, skymap, obj, 'n540', data_type, True, True) for obj in sample[-50:]]
 
     #ra, dec = sample[-1]['ra'], sample[-1]['dec']
     #half_size = 100 * PIXEL_SCALE * u.Unit('arcsec')
