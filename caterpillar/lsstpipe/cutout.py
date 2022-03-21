@@ -422,11 +422,16 @@ def generate_cutout(butler, skymap, ra, dec, band='N708', data_type='deepCoadd',
 
     cutout = afwImage.ExposureF(stamp, stamp_wcs)
 
+    if bbox_sizes[bbox_sorted_ind[-1]] < (half_size_pix * 2 + 1) ** 2:
+        flag = 1 
+    else:
+        flag = 2
+
     # The final product of the cutout
     if psf:
         psf = _get_psf(cutouts[bbox_sorted_ind[-1]], coord)
-        return cutout, psf
-    return cutout
+        return cutout, psf, flag
+    return cutout, flag
 
 def prepare_sample(input_cat, root, collections, ready=False, save=True, half_size=10, unit='arcsec',
                    output_dir='./', prefix=None, ra_col='ra', dec_col='dec', id_col='id', chunk=None):
@@ -490,18 +495,27 @@ def cutout_one(butler, skymap, obj, band, data_type, psf, verbose):
     cutout = generate_cutout(
         butler, skymap, ra, dec, band=band, data_type=data_type, 
         half_size=half_size, psf=psf)
+    
+    if cutout is None:
+        if verbose:
+            print("# No data for {:s} at {:.5f} {:.5f}".format(obj['name'], ra, dec))
+        return 0
 
     # Make a new folder is necessary
     if not os.path.isdir(dir):
         os.makedirs(dir, exist_ok=True)
 
     if psf:
-        img, psf = cutout
+        img, psf, flag = cutout
         img.writeFits(os.path.join(dir, "{:s}_{:s}_{:s}.fits".format(prefix, band, data_type)))
         psf.writeFits(os.path.join(dir, "{:s}_{:s}_psf.fits".format(prefix, band)))
     else:
-        cutout.writeFits(os.path.join(dir, "{:s}_{:s}_{:s}.fits".format(prefix, band, data_type)))
+        img, flag = cutout
+        img.writeFits(os.path.join(dir, "{:s}_{:s}_{:s}.fits".format(prefix, band, data_type)))
 
+    if verbose:
+        print("Done! Saved in {:s}/{:s}".format(dir, prefix))
+    return flag
 
 def cutout_batch(input_cat, root, collections, band, njobs=1, psf=True, ready=False, save=True, half_size=10, 
                  unit='arcsec', data_type='deepCoadd', output_dir='./', prefix=None, ra_col='ra', dec_col='dec', 
@@ -518,7 +532,9 @@ def cutout_batch(input_cat, root, collections, band, njobs=1, psf=True, ready=Fa
         raise ValueError("Wrong coadd type. [deepCoadd, deepCoadd_calexp, deepCoadd_background, deepCoadd_calexp_background]")
     
     if njobs <= 1:
-        _ = [cutout_one(butler, skymap, obj, band, data_type, psf, verbose) for obj in sample]
+        flags = [cutout_one(butler, skymap, obj, band, data_type, psf, verbose) for obj in sample]
+        sample['flag'] = flags
+        return sample
     else:
         Parallel(n_jobs=njobs)(delayed(cutout_one)(butler, skymap, obj, band, data_type, psf, verbose) for obj in sample)
     
@@ -537,16 +553,18 @@ def test_cutout():
 
     data_type='deepCoadd'
 
-    _ = cutout_batch(
-        input_cat, root, n708, 'N708', njobs=4, psf=True, ready=False, save=True, half_size='half_size',
-        unit='arcsec', data_type=data_type, output_dir=output, prefix='g09_broadcut', chunk=90)
+    sample_n708 = cutout_batch(
+        input_cat, root, n708, 'N708', njobs=1, psf=True, ready=False, save=True, half_size='half_size',
+        unit='arcsec', data_type=data_type, output_dir=output, prefix='g09_broadcut', chunk=90, verbose=True)
 
     today = date.today()
     input_cat = os.path.join(
         output, 'g09_broadcut_cosmos-{:4d}-{:02d}-{:02d}.fits'.format(today.year, today.month, today.day))
-    _ = cutout_batch(
-        input_cat, root, n540, 'n540', njobs=4, psf=True, ready=True, save=False, half_size='half_size',
-        unit='arcsec', data_type=data_type, output_dir=output, prefix='g09_broadcut', chunk=90)
+    sample_n540 = cutout_batch(
+        input_cat, root, n540, 'n540', njobs=1, psf=True, ready=True, save=False, half_size='half_size',
+        unit='arcsec', data_type=data_type, output_dir=output, prefix='g09_broadcut', chunk=90, verbose=True)
+
+    return sample_n708, sample_n540
 
     # Prepare the input catalog
     #sample = _prepare_input_cat(
