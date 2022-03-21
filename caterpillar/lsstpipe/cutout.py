@@ -52,12 +52,12 @@ def _get_ra_dec_name(id_arr, ra_arr, dec_arr):
             str(i), "{:8.4f}".format(ra).strip(), "{:8.4f}".format(dec).strip()
             ) for (i, ra, dec) in zip(id_arr, ra_arr, dec_arr)]
 
-def _get_file_prefix(name_arr, band, prefix):
+def _get_file_prefix(name_arr, prefix):
     """Get the prefix of the output files based on the ID."""
     if prefix is None:
-        return ["{:s}_{:s}".format(str(name), band) for name in name_arr]
+        return ["{:s}".format(str(name)) for name in name_arr]
     else:
-        return ["{:s}_{:s}_{:s}".format(prefix, str(name), band) for name in name_arr]
+        return ["{:s}_{:s}".format(prefix, str(name)) for name in name_arr]
 
 def _get_output_dir(output_dir, chunk_arr, name_arr):
     """Get the directory for the output cutout data."""
@@ -88,7 +88,7 @@ def _get_int_chunk(data, n_chunk):
     
     return chunk_arr
 
-def _prepare_input_cat(input_cat, half_size, unit, ra_col, dec_col, band, id_col, chunk, 
+def _prepare_input_cat(input_cat, half_size, unit, ra_col, dec_col, id_col, chunk, 
                        prefix, output_dir, save=True):
     """
     Prepare the input sample for the given dataset.
@@ -96,7 +96,7 @@ def _prepare_input_cat(input_cat, half_size, unit, ra_col, dec_col, band, id_col
     The cutouts are organized into:
         [output_dir]/[chunk_id]/[galaxy_id]/[file_name].fits
     And the file name prefix is: 
-        ([prefix]_[galaxy_id]_[band]
+        ([prefix]_[galaxy_id]
     """
     # Load the input catalog
     if isinstance(input_cat, str):
@@ -140,7 +140,7 @@ def _prepare_input_cat(input_cat, half_size, unit, ra_col, dec_col, band, id_col
         name_arr = input_cat[id_col]
     
     # Get the output file prefix 
-    prefix_arr = _get_file_prefix(name_arr, band, prefix)
+    prefix_arr = _get_file_prefix(name_arr, prefix)
     
     # Get the directory of the output file
     if chunk is not None:
@@ -474,11 +474,35 @@ def catalog_cutout(input_cat, root, collections, band, half_size=10, unit='arcse
         raise ValueError("Wrong coadd type. [deepCoadd, deepCoadd_calexp, deepCoadd_background, deepCoadd_calexp_background]")
 
     # Get the butler for the given dataset and return the skyMap object.
-    butler, skyMap = _prepare_dataset(root, collections)
+    butler, skymap = _prepare_dataset(root, collections)
 
     # Prepare the input catalog
     sample = _prepare_input_cat(
         input_cat, half_size, unit, ra_col, dec_col, band, id_col, chunk, prefix, output_dir, save=False)
+
+
+def cutout_one(butler, skymap, obj, band, data_type, psf, verbose=True):
+    """Generate cutout for a single object.
+    """
+    prefix, dir, ra, dec, half_size = (
+        obj['prefix'], obj['dir'], obj['ra'], obj['dec'], obj['half_size'])
+    if verbose:
+        print("# Dealing with {:s} at {:.5f} {:.5f}".format(prefix, ra, dec))
+
+    cutout = generate_cutout(
+        butler, skymap, ra, dec, band=band, data_type=data_type, 
+        half_size=half_size, psf=psf)
+
+    # Make a new folder is necessary
+    if not os.path.isdir(dir):
+        os.makedirs(dir, exist_ok=True)
+
+    if psf:
+        img, psf = cutout
+        img.writeFits(os.path.join(dir, "{:s}_{:s}_{:s}.fits".format(prefix, band, data_type)))
+        psf.writeFits(os.path.join(dir, "{:s}_{:s}_psf.fits".format(prefix, band)))
+    else:
+        cutout.writeFits(os.path.join(dir, "{:s}_{:s}_{:s}.fits".format(prefix, band, data_type)))
 
 
 def test_cutout():
@@ -488,35 +512,41 @@ def test_cutout():
     input_cat = '/home/sh19/work/cosmos-2022-02-17.fits'
 
     root = '/projects/MERIAN/repo'
-    collections = 'DECam/runs/merian/w_2022_02/t9813_deep_N708'
+    n708 = 'DECam/runs/merian/w_2022_02/t9813_deep_N708'
+    n540 = 'DECam/runs/merian/w_2022_02/t9813_deep_N540'
 
-    band = 'N708'
-    data_type='deepCoadd_calexp'
-
-    butler, skymap = _prepare_dataset(root, collections)
+    data_type='deepCoadd'
 
     # Prepare the input catalog
     sample = _prepare_input_cat(
-        input_cat, 20.0, 'arcsec', 'ra', 'dec', 'N708', 'name', 20, 'cosmos', './', save=False)
+        input_cat, 'half_size', 'arcsec', 'ra', 'dec', 'name', 20, 'cosmos-test', '/home/sh19/work/test', save=True)
 
-    ra, dec = sample[-1]['ra'], sample[-1]['dec']
-    half_size = 100 * PIXEL_SCALE * u.Unit('arcsec')
-    print("RA = {:.5f}, Dec = {:.5f}".format(ra, dec))
+    butler_n708, skymap = _prepare_dataset(root, n708)
+
+    _ = [cutout_one(butler_n708, skymap, obj, 'N708', data_type, psf=True) for obj in sample[-50:]]
+
+    butler_n540, skymap = _prepare_dataset(root, n540)
+
+    _ = [cutout_one(butler_n540, skymap, obj, 'n540', data_type, psf=True) for obj in sample[-50:]]
+
+    #ra, dec = sample[-1]['ra'], sample[-1]['dec']
+    #half_size = 100 * PIXEL_SCALE * u.Unit('arcsec')
+    #print("RA = {:.5f}, Dec = {:.5f}".format(ra, dec))
 
     # Coordinate of the image center
-    coord = geom.SpherePoint(ra * geom.degrees, dec * geom.degrees)
+    #coord = geom.SpherePoint(ra * geom.degrees, dec * geom.degrees)
 
     # Make a list of (RA, Dec) that covers the cutout region
-    radec_list = np.array(
-        sky_cone(ra, dec, half_size, steps=50)).T
+    #radec_list = np.array(
+    #    sky_cone(ra, dec, half_size, steps=50)).T
     
     #img_patches = _get_patches(butler, skymap, radec_list, band, data_type=data_type)
 
     # Retrieve the Patches that cover the cutout region
-    cutout, psf = generate_cutout(
-        butler, skymap, ra, dec, band='N708', data_type='deepCoadd',
-        half_size=half_size, psf=True, verbose=False)
+    #cutout, psf = generate_cutout(
+    #    butler, skymap, ra, dec, band='N708', data_type='deepCoadd',
+    #    half_size=half_size, psf=True, verbose=False)
     
-    cutout.writeFits('cutout.fits')
+    #cutout.writeFits('cutout.fits')
 
-    return cutout
+    #return cutout
