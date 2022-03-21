@@ -108,25 +108,26 @@ def _prepare_input_cat(input_cat, half_size, unit, ra_col, dec_col, band, id_col
     if isinstance(input_cat, str):
         input_cat = QTable.read(input_cat)
 
+    # Check the half size unit
+    if unit.strip() not in ['arcsec', 'arcmin', 'degree', 'pixel']:
+        raise ValueError("Wrong size unit. [arcsec, arcmin, degree, pixel]")
+
     # Get an array for half size
     if isinstance(half_size, str):
         if half_size.strip() not in input_cat.colnames:
             raise ValueError("Wrong half size column name. [{:s}]".format(half_size))
         half_size_arr = input_cat[half_size]
+        if unit != 'pixel' and half_size_arr.unit is None:
+            half_size_arr = [s * u.Unit(unit) for s in half_size_arr]
     else:
         # Using the same size for all objects
         half_size_arr = np.full(len(input_cat), float(half_size))
+        if unit != 'pixel':
+            half_size_arr *= u.Unit(unit)
     
     if np.any(half_size_arr < 0):
         raise ValueError("Negative size value.")
     
-    # Add size unit if necessary
-    if unit != 'pixel' and half_size_arr.unit is None:
-        # Check the half size unit
-        if unit.strip() not in ['arcsec', 'arcmin', 'degree', 'pixel']:
-            raise ValueError("Wrong size unit. [arcsec, arcmin, degree, pixel]")
-        half_size_arr = [s * u.Unit(unit) for s in half_size_arr]
-
     # Get the RA and DEC arrays
     if ra_col not in input_cat.colnames:
         raise ValueError("Wrong R.A. column name. [{:s}]".format(ra_col))
