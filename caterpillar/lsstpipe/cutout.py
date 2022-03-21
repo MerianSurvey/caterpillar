@@ -27,15 +27,9 @@ try:
     Log.setLevel(lsst.log.ERROR)
 
     import lsst.daf.butler as dafButler
-
-    import lsst.daf.base
     import lsst.geom as geom
     import lsst.afw.image as afwImage
     import lsst.afw.geom as afwGeom
-    import lsst.afw.coord as afwCoord
-
-    import lsst.afw.display
-    import lsst.afw.display.rgb as afwRgb
 except ImportError:
     warnings.warn("lsstPipe is not installed. Please install it first.")
 
@@ -518,6 +512,8 @@ def test_cutout():
         sky_cone(ra, dec, 100 * PIXEL_SCALE * u.Unit('arcsec'), steps=50)).T
 
     # Retrieve the Patches that cover the cutout region
-    img_patches = _get_patches(butler, skymap, radec_list, band, data_type=data_type)
+    cutout = generate_cutout(
+        butler, skymap, ra, dec, band='N708', data_type='deepCoadd',
+        half_size=10.0 * u.arcsec, psf=True, verbose=False)
 
-    return sample, img_patches
+    return sample, cutout
