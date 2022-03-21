@@ -279,9 +279,13 @@ def _get_patches(butler, skymap, coord_list, band, data_type='deepCoadd'):
     images = []
     for t, p in patches:
         data_id = {'tract' : t, 'patch' : p, 'band' : band.upper()}
-        if butler.datasetExists(data_type, data_id):
-            img = butler.get(data_type, data_id, immediate=True)
-            images.append(img)
+        try:
+            if butler.datasetExists(data_type, data_id):
+                img = butler.get(data_type, data_id, immediate=True)
+                images.append(img)
+        except LookupError:
+            # Some times a Tract or Patch is not available in the data repo
+            pass
 
     if len(images) == 0:
         return None
@@ -380,9 +384,6 @@ def generate_cutout(butler, skymap, ra, dec, band='N708', data_type='deepCoadd',
     # Width and height of the post-stamps
     stamp_shape = (half_size_pix * 2 + 1, half_size_pix * 2 + 1)
 
-    # Coordinate of the image center
-    coord = geom.SpherePoint(ra * geom.degrees, dec * geom.degrees)
-
     # Make a list of (RA, Dec) that covers the cutout region
     radec_list = np.array(
         sky_cone(ra, dec, half_size_pix * PIXEL_SCALE * u.Unit('arcsec'), steps=50)).T
@@ -394,6 +395,9 @@ def generate_cutout(butler, skymap, ra, dec, band='N708', data_type='deepCoadd',
         if verbose:
             print('***** No data at {:.5f} {:.5f} *****'.format(ra, dec))
         return None
+
+    # Coordinate of the image center
+    coord = geom.SpherePoint(ra * geom.degrees, dec * geom.degrees)
 
     # Making the stacked cutout
     cutouts = []
@@ -503,7 +507,7 @@ def test_cutout():
     sample = _prepare_input_cat(
         input_cat, 20.0, 'arcsec', 'ra', 'dec', 'N708', 'name', 20, 'cosmos', './', save=False)
 
-    ra, dec = sample[0]['ra'], sample[0]['dec']
+    ra, dec = sample[-1]['ra'], sample[-1]['dec']
     print("RA = {:.5f}, Dec = {:.5f}".format(ra, dec))
 
     # Coordinate of the image center
