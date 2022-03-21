@@ -3,4 +3,4 @@ scipy
 joblib
 astropy
 spherical_geometry
-git+https://github.com/bd-j/sedpy.git
+#git+https://github.com/bd-j/sedpy.git@0.3.0#egg=sedpy
