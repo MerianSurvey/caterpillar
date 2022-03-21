@@ -281,7 +281,7 @@ def _get_patches(butler, skymap, coord_list, band, data_type='deepCoadd'):
         data_id = {'tract' : t, 'patch' : p, 'band' : band.upper()}
         try:
             if butler.datasetExists(data_type, data_id):
-                img = butler.get(data_type, data_id, immediate=True)
+                img = butler.get(data_type, data_id)
                 images.append(img)
         except LookupError:
             # Some times a Tract or Patch is not available in the data repo
