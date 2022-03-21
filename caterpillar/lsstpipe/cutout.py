@@ -292,8 +292,7 @@ def _get_single_cutout(img, coord, half_size_pix):
     """
     # Get the WCS and the pixel coordinate of the central pixel
     wcs = img.getWcs()
-    pix = wcs.skyToPixel(coord)
-    pix = geom.Point2I(pix)
+    pix = geom.Point2I(wcs.skyToPixel(coord))
 
     # Define a bounding box for the cutout region
     bbox = geom.Box2I(pix, pix)
@@ -412,8 +411,7 @@ def generate_cutout(butler, skymap, ra, dec, band='N708', data_type='deepCoadd',
         bbox_sizes.append(cut.getBBox().getWidth() * cut.getBBox().getHeight())
 
     # Stitch cutouts together with the largest bboxes inserted last
-    stamp_bbox = geom.BoxI(geom.Point2I(0,0), geom.Extent2I(*stamp_shape))
-    stamp = afwImage.MaskedImageF(stamp_bbox)
+    stamp = afwImage.MaskedImageF(geom.BoxI(geom.Point2I(0,0), geom.Extent2I(*stamp_shape)))
     bbox_sorted_ind = np.argsort(bbox_sizes)
 
     for i in bbox_sorted_ind:
@@ -502,6 +500,7 @@ def test_cutout():
         input_cat, 20.0, 'arcsec', 'ra', 'dec', 'N708', 'name', 20, 'cosmos', './', save=False)
 
     ra, dec = sample[-1]['ra'], sample[-1]['dec']
+    half_size = 100 * PIXEL_SCALE * u.Unit('arcsec')
     print("RA = {:.5f}, Dec = {:.5f}".format(ra, dec))
 
     # Coordinate of the image center
@@ -509,13 +508,15 @@ def test_cutout():
 
     # Make a list of (RA, Dec) that covers the cutout region
     radec_list = np.array(
-        sky_cone(ra, dec, 100 * PIXEL_SCALE * u.Unit('arcsec'), steps=50)).T
+        sky_cone(ra, dec, half_size, steps=50)).T
     
-    img_patches = _get_patches(butler, skymap, radec_list, band, data_type=data_type)
+    #img_patches = _get_patches(butler, skymap, radec_list, band, data_type=data_type)
 
     # Retrieve the Patches that cover the cutout region
-    #cutout = generate_cutout(
-    #    butler, skymap, ra, dec, band='N708', data_type='deepCoadd',
-    #    half_size=10.0 * u.arcsec, psf=True, verbose=False)
+    cutout, psf = generate_cutout(
+        butler, skymap, ra, dec, band='N708', data_type='deepCoadd',
+        half_size=half_size, psf=True, verbose=False)
+    
+    cutout.writeFits('cutout.fits')
 
-    return img_patches, coord
+    return cutout
