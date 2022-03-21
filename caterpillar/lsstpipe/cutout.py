@@ -491,6 +491,9 @@ def cutout_one(butler, skymap, obj, band, data_type, psf, verbose):
         obj['prefix'], obj['dir'], obj['ra'], obj['dec'], obj['half_size'])
     if verbose:
         print("# Dealing with {:s} at {:.5f} {:.5f}".format(prefix, ra, dec))
+    
+    img_fits = os.path.join(dir, "{:s}_{:s}_{:s}.fits".format(prefix, band, data_type))
+    psf_fits = os.path.join(dir, "{:s}_{:s}_psf.fits".format(prefix, band))
 
     cutout = generate_cutout(
         butler, skymap, ra, dec, band=band, data_type=data_type, 
@@ -498,7 +501,7 @@ def cutout_one(butler, skymap, obj, band, data_type, psf, verbose):
     
     if cutout is None:
         if verbose:
-            print("# No data for {:s} at {:.5f} {:.5f}".format(obj['name'], ra, dec))
+            print("# No data for {:s} at {:.5f} {:.5f}".format(str(obj['name']), ra, dec))
         return 0
 
     # Make a new folder is necessary
@@ -507,11 +510,11 @@ def cutout_one(butler, skymap, obj, band, data_type, psf, verbose):
 
     if psf:
         img, psf, flag = cutout
-        img.writeFits(os.path.join(dir, "{:s}_{:s}_{:s}.fits".format(prefix, band, data_type)))
-        psf.writeFits(os.path.join(dir, "{:s}_{:s}_psf.fits".format(prefix, band)))
+        img.writeFits(img_fits)
+        psf.writeFits(psf_fits)
     else:
         img, flag = cutout
-        img.writeFits(os.path.join(dir, "{:s}_{:s}_{:s}.fits".format(prefix, band, data_type)))
+        img.writeFits(img_fits)
 
     if verbose:
         print("Done! Saved in {:s}/{:s}".format(dir, prefix))
@@ -549,7 +552,7 @@ def test_cutout():
     n708 = 'DECam/runs/merian/w_2022_02/t9813_deep_N708'
     n540 = 'DECam/runs/merian/w_2022_02/t9813_deep_N540'
 
-    input_cat = os.path.join(output, 'g09_broadcut_cosmos.fits')
+    input_cat = os.path.join(output, 'g09_broadcut_cosmos-2022-03-21.fits')
 
     data_type='deepCoadd'
 
@@ -557,12 +560,17 @@ def test_cutout():
         input_cat, root, n708, 'N708', njobs=1, psf=True, ready=False, save=True, half_size='half_size',
         unit='arcsec', data_type=data_type, output_dir=output, prefix='g09_broadcut', chunk=90, verbose=True)
 
-    today = date.today()
-    input_cat = os.path.join(
-        output, 'g09_broadcut_cosmos-{:4d}-{:02d}-{:02d}.fits'.format(today.year, today.month, today.day))
+    sample_n708.write(os.path.join(output, 'g09_broadcut_cosmos-2022-03-21_n708_done.fits'))
+
+    #today = date.today()
+    #input_cat = os.path.join(
+    #    output, 'g09_broadcut_cosmos-{:4d}-{:02d}-{:02d}.fits'.format(today.year, today.month, today.day))
+
     sample_n540 = cutout_batch(
         input_cat, root, n540, 'n540', njobs=1, psf=True, ready=True, save=False, half_size='half_size',
         unit='arcsec', data_type=data_type, output_dir=output, prefix='g09_broadcut', chunk=90, verbose=True)
+
+    sample_n540.write(os.path.join(output, 'g09_broadcut_cosmos-2022-03-21_n540_done.fits'))
 
     return sample_n708, sample_n540
 
