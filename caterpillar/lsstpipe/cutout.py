@@ -505,7 +505,7 @@ def cutout_one(butler, skymap, obj, band, data_type, psf, verbose):
 
 def cutout_batch(input_cat, root, collections, band, njobs=1, psf=True, ready=False, save=True, half_size=10, 
                  unit='arcsec', data_type='deepCoadd', output_dir='./', prefix=None, ra_col='ra', dec_col='dec', 
-                 id_col='id', chunk=None, verbose=False):
+                 id_col='name', chunk=None, verbose=False):
     """
     """
     # Prepare the butler, skymap, and the sample.
@@ -528,7 +528,7 @@ def test_cutout():
     Test the cutout function.
     """
     root = '/projects/MERIAN/repo'
-    output = '/tigress/MERIAN/poststamps/g09_broadcut'
+    output = '/projects/MERIAN/poststamps/g09_broadcut'
 
     n708 = 'DECam/runs/merian/w_2022_02/t9813_deep_N708'
     n540 = 'DECam/runs/merian/w_2022_02/t9813_deep_N540'
