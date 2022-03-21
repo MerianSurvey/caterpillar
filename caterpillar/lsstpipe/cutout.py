@@ -501,7 +501,7 @@ def test_cutout():
 
     # Prepare the input catalog
     sample = _prepare_input_cat(
-        input_cat, 20.0, 'arcsec', 'ra', 'dec', 'N708', 'id', 20, 'cosmos', './', save=False)
+        input_cat, 20.0, 'arcsec', 'ra', 'dec', 'N708', 'name', 20, 'cosmos', './', save=False)
 
     ra, dec = sample[0]['ra'], sample[0]['dec']
     print("RA = {:.5f}, Dec = {:.5f}".format(ra, dec))
