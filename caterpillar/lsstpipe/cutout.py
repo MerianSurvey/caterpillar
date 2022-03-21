@@ -510,10 +510,12 @@ def test_cutout():
     # Make a list of (RA, Dec) that covers the cutout region
     radec_list = np.array(
         sky_cone(ra, dec, 100 * PIXEL_SCALE * u.Unit('arcsec'), steps=50)).T
+    
+    img_patches = _get_patches(butler, skymap, img_patches, band, data_type=data_type)
 
     # Retrieve the Patches that cover the cutout region
-    cutout = generate_cutout(
-        butler, skymap, ra, dec, band='N708', data_type='deepCoadd',
-        half_size=10.0 * u.arcsec, psf=True, verbose=False)
+    #cutout = generate_cutout(
+    #    butler, skymap, ra, dec, band='N708', data_type='deepCoadd',
+    #    half_size=10.0 * u.arcsec, psf=True, verbose=False)
 
-    return sample, cutout
+    return img_patches
