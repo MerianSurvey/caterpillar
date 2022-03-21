@@ -533,14 +533,17 @@ def test_cutout():
     n708 = 'DECam/runs/merian/w_2022_02/t9813_deep_N708'
     n540 = 'DECam/runs/merian/w_2022_02/t9813_deep_N540'
 
-    input_cat = os.path.join(output, 'g09_broadcut_cosmos-2022-03-21.fits')
+    input_cat = os.path.join(output, 'g09_broadcut_cosmos.fits')
 
     data_type='deepCoadd'
 
     _ = cutout_batch(
-        input_cat, root, n708, 'N708', njobs=4, psf=True, ready=True, save=False, half_size='half_size',
+        input_cat, root, n708, 'N708', njobs=4, psf=True, ready=False, save=True, half_size='half_size',
         unit='arcsec', data_type=data_type, output_dir=output, prefix='g09_broadcut', chunk=90)
 
+    today = date.today()
+    input_cat = os.path.join(
+        output, 'g09_broadcut_cosmos-{:4d}-{:02d}-{:02d}.fits'.format(today.year, today.month, today.day))
     _ = cutout_batch(
         input_cat, root, n540, 'n540', njobs=4, psf=True, ready=True, save=False, half_size='half_size',
         unit='arcsec', data_type=data_type, output_dir=output, prefix='g09_broadcut', chunk=90)
