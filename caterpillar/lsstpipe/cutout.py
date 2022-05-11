@@ -215,6 +215,10 @@ def sky_cone(ra_c, dec_c, theta, steps=50, include_center=True):
     """
     if isinstance(theta, float) or isinstance(theta, int):
         theta = theta * u.Unit('arcsec')
+    if isinstance(ra_c, u.Quantity):
+        ra_c = ra_c.value
+    if isinstance(dec_c, u.Quantity):
+        dec_c = dec_c.value
 
     cone = SphericalPolygon.from_cone(
         ra_c, dec_c, theta.to('deg').value, steps=steps)
@@ -372,6 +376,11 @@ def generate_cutout(butler, skymap, ra, dec, band='N708', data_type='deepCoadd',
         half_size_pix = int(half_size)
     else:
         half_size_pix = int(half_size.to('arcsec').value / PIXEL_SCALE)
+
+    if isinstance(ra, u.Quantity):
+        ra = ra.value
+    if isinstance(dec, u.Quantity):
+        dec = dec.value
 
     # Width and height of the post-stamps
     stamp_shape = (half_size_pix * 2 + 1, half_size_pix * 2 + 1)
