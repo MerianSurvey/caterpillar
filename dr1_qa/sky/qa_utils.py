@@ -63,10 +63,12 @@ def plot_coadd2d_oneTract(cat,tract = 9813,colname = 'N708_ap09Flux',fname='Trac
         std_patch: array. standard deviation of each patch in this tract.
     """
 
-  
-    cat_coadd = cat[cat['tract']==tract]
+    tract_colname = 'tract' if 'tract' in cat.colnames else 'tract_Merian'
+    patch_colname = 'patch' if 'patch' in cat.colnames else 'patch_Merian'
 
-    flux_raw = cat_coadd[colname]
+    cat_coadd = cat[cat[tract_colname]==tract]
+
+    flux_raw = copy.deepcopy(cat_coadd[colname].data)
     mask, flux = sigmaclip(flux_raw,low=3,high=3)
     Neff_aper = np.sum(mask)
     
@@ -102,7 +104,7 @@ def plot_coadd2d_oneTract(cat,tract = 9813,colname = 'N708_ap09Flux',fname='Trac
     ax1.set_title(' '.join((colname, 'Coadd Tract', str(tract))),fontsize=20)
 
     # Right panel: Patches
-    patch_list = np.unique(cat_coadd['patch'])
+    patch_list = np.unique(cat_coadd[patch_colname])
     nside = int(np.sqrt(np.nanmax(patch_list)+1))
     patch_matrix = np.zeros((nside,nside))
     cmap=plt.cm.seismic
@@ -111,7 +113,7 @@ def plot_coadd2d_oneTract(cat,tract = 9813,colname = 'N708_ap09Flux',fname='Trac
     std_patch = []
 
     for patch_id in patch_list:
-        patch_cat = cat_coadd[cat_coadd['patch']==patch_id]
+        patch_cat = cat_coadd[cat_coadd[patch_colname]==patch_id]
         patch_flux_raw = patch_cat[colname]
         mask, patch_flux = sigmaclip(patch_flux_raw)
         Neff = len(patch_flux)
@@ -396,7 +398,8 @@ def plot_skyqa_for_Tract(butler, tract_info,
            
 
 def sigmaclip(a, low=3., high=3.): 
-    
+
+    a = copy.deepcopy(a)
     # mask=0 means the value should be discarded
     
     # clip nan
