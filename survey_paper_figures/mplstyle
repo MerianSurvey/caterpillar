@@ -1,4 +1,4 @@
-font.family: Times New Roman
+font.family: Times New Roman 
 mathtext.fontset: cm
 
 axes.titlesize : 35
@@ -8,6 +8,7 @@ lines.markersize : 10
 xtick.labelsize : 30
 ytick.labelsize : 30
 
+
 ## ***************************************************************************
 ## * TICKS                                                                   *
 ## ***************************************************************************
@@ -16,8 +17,8 @@ xtick.top:           True   # draw ticks on the top side
 xtick.bottom:        True    # draw ticks on the bottom side
 xtick.labeltop:      False   # draw label on the top
 xtick.labelbottom:   True    # draw label on the bottom
-xtick.major.size:     7.0     # major tick size in points
-xtick.minor.size:     3.5     # minor tick size in points
+xtick.major.size:     16     # major tick size in points
+xtick.minor.size:     8     # minor tick size in points
 xtick.major.width:    0.7     # major tick width in points
 xtick.minor.width:    0.6     # minor tick width in points
 xtick.major.pad:      7.0     # distance to major tick label in points
@@ -37,8 +38,8 @@ ytick.left:          True    # draw ticks on the left side
 ytick.right:         True   # draw ticks on the right side
 ytick.labelleft:     True    # draw tick labels on the left side
 ytick.labelright:    False   # draw tick labels on the right side
-ytick.major.size:    7.0     # major tick size in points
-ytick.minor.size:    3.5       # minor tick size in points
+ytick.major.size:    16     # major tick size in points
+ytick.minor.size:    8       # minor tick size in points
 ytick.major.width:   0.7     # major tick width in points
 ytick.minor.width:   0.6     # minor tick width in points
 ytick.major.pad:     7.0     # distance to major tick label in points
