@@ -1,0 +1,21 @@
+In this directory, we include the notebooks and scripts used to generate the QA figures that appear in the Merian survey paper.
+
+
+Astrometric calibration tests: 
+Crossmatching HSC stars and Merian stars and calculating the D(RA) and D(Dec) mean/median/rms offsets. We should have a function to select point sources with good photometry, isolated, and in limited colors (to get rid of quasars).
+Repeat this test with the PS1 astrometric catalog (the LSST Pipeline should have the function to do that).
+
+Photometric calibration tests:
+Mean (or median) offset from the stellar locus & the scatter along the stellar locus.
+
+Sky background subtraction test:
+Mean (or median) sky object flux & its RMS (could be in a few different aperture choices).
+
+Point source detection limit:
+Only using the Merian catalog — calculating the S/N estimate for sources with 23rd mag and brighter. Try it for gaap 1p0 photometry.
+
+S/N as a function of magnitude.
+Infer the 5-sigma limit.
+
+Single exposure tests:
+Plot the 5-sigma limit (from sky objects?) as a function of t_eff for a variety of single exposures taken COSMOS in various conditions (and t_eff).
