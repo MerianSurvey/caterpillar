@@ -146,16 +146,24 @@ def astrometry_crossmatch(merian_tab):
     offset_ra_dcos = merian_tab['coord_ra_Merian'] * np.cos(np.deg2rad(merian_tab['coord_dec_Merian']) )
     offset_ra = offset_ra_dcos.max() - offset_ra_dcos.min()
     offset_dec = merian_tab['coord_dec_Merian'].max() - merian_tab['coord_dec_Merian'].min()
- 
+    
+    #-----------------------
+    # Point-Source selection
+    #-----------------------
 
-    # Merian point source selection
+    # Merian point source selection: point-source in all filters
     ps_flg = (merian_tab['g_extendedness_value_HSCS20A'] == 0) & (merian_tab['i_extendedness_value_HSCS20A']==0) 
     ps_flg &= (merian_tab['r_extendedness_value_HSCS20A'] == 0) & (merian_tab['z_extendedness_value_HSCS20A']==0)
     ps_tab = merian_tab[ps_flg]
 
-    # Merian magnitude cut
-    gmag = -2.5 * np.log10(ps_tab['g_gaap1p5Flux_Merian']) + 31.4
-    ps_tab = ps_tab[(gmag <= 24.) &  (gmag >= 20.)]
+    # Merian magnitude cut: g band magnitude < 20 
+    gmag = -2.5 * np.log10(ps_tab['g_cModelFlux_Merian']) + 31.4
+    ps_tab = ps_tab[(gmag <= 20.)]
+
+
+    #-----------------------
+    # GAIA  matching
+    #-----------------------
 
     # GAIA reference catalog
     coord = SkyCoord(ra=median_ra, dec=median_dec, unit=(u.deg, u.deg), frame='icrs')
@@ -185,6 +193,9 @@ def astrometry_crossmatch(merian_tab):
     dra_median_gaia = sigma_clipped_stats(dra_gaia, sigma=3)[1]
     ddec_median_gaia = sigma_clipped_stats(ddec_gaia, sigma=3)[1]
 
+    #-----------------------
+    # HSC  matching
+    #-----------------------
 
     # Match HSC
     ps_coord_merian = SkyCoord(ra=ps_tab['coord_ra_Merian'], dec=ps_tab['coord_dec_Merian'], unit=(u.deg, u.deg))
@@ -195,10 +206,11 @@ def astrometry_crossmatch(merian_tab):
     matched &= ps_tab['hsc_match'].astype(bool)
     matched_ps = ps_tab[matched]
     
-    # the 50% brightest are selected
-    g_50, g_45, g_55 = np.nanpercentile(matched_ps['g_gaap2p5Flux_Merian'], [50, 45, 55])
-    matched_ps = matched_ps[ (matched_ps['g_gaap2p5Flux_Merian'] > g_50)]
+    # # the 50% brightest are selected
+    # g_50, g_45, g_55 = np.nanpercentile(matched_ps['g_gaap2p5Flux_Merian'], [50, 45, 55])
+    # matched_ps = matched_ps[ (matched_ps['g_gaap2p5Flux_Merian'] > g_50)]
 
+    # remove invalid values
     flg = (matched_ps['dec_HSCS20A'] !=0 ) & (matched_ps['ra_HSCS20A'] !=0)
 
     dra_ps = (matched_ps['coord_ra_Merian'] - matched_ps['ra_HSCS20A'])[flg]
@@ -273,11 +285,3 @@ if __name__ == '__main__':
         fig.savefig(f'DR1_astrom_calib_gaia_hsc_{tractnum}.png')
 
         plt.clf()
-    
-
-
- 
-
-
-
- 
